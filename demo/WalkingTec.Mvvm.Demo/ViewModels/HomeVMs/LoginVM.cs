@@ -64,7 +64,7 @@ namespace WalkingTec.Mvvm.Demo.ViewModels.HomeVMs
 
             // generate token
             var authService = GlobalServices.GetRequiredService<IAuthService>();
-            Token = authService.Issue(rv).Result;
+            Token = authService.IssueToken(rv).Result;
 
             if (ignorePris == false)
             {

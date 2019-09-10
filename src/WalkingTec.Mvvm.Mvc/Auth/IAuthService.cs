@@ -2,9 +2,9 @@
 // IAuthService.cs
 //
 // Author:
-//       Vito <wuwenhao0327@gmail.com>
+//       Michael,Vito
 //
-// Copyright (c) 2019 Vito
+// Copyright (c) 2019 WTM
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,13 @@ namespace WalkingTec.Mvvm.Mvc.Auth
 {
     public interface IAuthService
     {
-        Task<Token> Issue(LoginUserInfo loginUserInfo);
+        IDataContext DC { get; }
+
+        /// <summary>
+        /// Issue token
+        /// </summary>
+        /// <param name="loginUserInfo"></param>
+        /// <returns></returns>
+        Task<Token> IssueToken(LoginUserInfo loginUserInfo);
     }
 }

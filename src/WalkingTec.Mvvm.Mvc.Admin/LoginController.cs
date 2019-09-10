@@ -95,7 +95,7 @@ namespace WalkingTec.Mvvm.Admin.Api
 
             // generate token
             var authService = GlobalServices.GetRequiredService<IAuthService>();
-            var token = authService.Issue(rv).Result;
+            var token = authService.IssueToken(rv).Result;
 
             // 在 cookie 中写入 access_token
             HttpContext.Response.Cookies.Append($"{ConfigInfo.CookiePre}.access_token", token.AccessToken, new CookieOptions()

@@ -176,6 +176,7 @@ namespace WalkingTec.Mvvm.Mvc
 
             services.AddSingleton<CookieAuthMiddleware>();
             services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<ITokenRefreshService, TokenRefreshService>();
 
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
@@ -293,8 +294,7 @@ namespace WalkingTec.Mvvm.Mvc
                         }
                         if (u != null && u.EndsWith("/0"))
                         {
-                            u = u.Substring(0, u.Length - 2);
-                            u = u + "/{id}";
+                            u = u.Substring(0, u.Length - 2) + "/{id}";
                         }
                         a.Url = u;
                     }
@@ -313,20 +313,23 @@ namespace WalkingTec.Mvvm.Mvc
 
         private static GlobalData GetGlobalData()
         {
-            var gd = new GlobalData();
-
-            //获取所有程序集
-            gd.AllAssembly = Utils.GetAllAssembly();
+            var gd = new GlobalData
+            {
+                //获取所有程序集
+                AllAssembly = Utils.GetAllAssembly()
+            };
             var admin = GetRuntimeAssembly("WalkingTec.Mvvm.Mvc.Admin");
             if (admin != null && gd.AllAssembly.Contains(admin) == false)
             {
                 gd.AllAssembly.Add(admin);
             }
+
             var mvc = GetRuntimeAssembly("WalkingTec.Mvvm.Mvc");
             if (mvc != null && gd.AllAssembly.Contains(mvc) == false)
             {
                 gd.AllAssembly.Add(mvc);
             }
+
             gd.DataContextCI = GetDbContextCI(gd.AllAssembly);
             gd.AllModels = GetAllModels(gd.DataContextCI);
 
@@ -344,7 +347,7 @@ namespace WalkingTec.Mvvm.Mvc
                 var cache = GlobalServices.GetService<IDistributedCache>();
                 var menuCacheKey = "FFMenus";
                 var rv = cache.Get<List<FrameworkMenu>>(menuCacheKey);
-                if(rv!=null&&rv.Count>0)
+                if (rv != null && rv.Count > 0)
                 {
                     menus = rv;
                 }
@@ -811,32 +814,20 @@ namespace WalkingTec.Mvvm.Mvc
         }
     }
 
-
     /// <summary>
     /// 解决IIS InProgress下CurrentDirectory获取错误的问题
     /// </summary>
-    internal class CurrentDirectoryHelpers
-
+    internal static class CurrentDirectoryHelpers
     {
-
         internal const string AspNetCoreModuleDll = "aspnetcorev2_inprocess.dll";
 
-
-
         [System.Runtime.InteropServices.DllImport("kernel32.dll")]
-
         private static extern IntPtr GetModuleHandle(string lpModuleName);
 
-
-
         [System.Runtime.InteropServices.DllImport(AspNetCoreModuleDll)]
-
-        private static extern int http_get_application_properties(ref IISConfigurationData iiConfigData);
-
-
+        private static extern int Http_get_application_properties(ref IISConfigurationData iiConfigData);
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-
         private struct IISConfigurationData
 
         {
@@ -859,68 +850,37 @@ namespace WalkingTec.Mvvm.Mvc
 
         }
 
-
-
         public static void SetCurrentDirectory()
-
         {
-
             try
-
             {
-
                 // Check if physical path was provided by ANCM
-
                 var sitePhysicalPath = Environment.GetEnvironmentVariable("ASPNETCORE_IIS_PHYSICAL_PATH");
 
                 if (string.IsNullOrEmpty(sitePhysicalPath))
-
                 {
-
                     // Skip if not running ANCM InProcess
-
                     if (GetModuleHandle(AspNetCoreModuleDll) == IntPtr.Zero)
-
                     {
-
                         return;
-
                     }
 
-
-
-                    IISConfigurationData configurationData = default(IISConfigurationData);
-
-                    if (http_get_application_properties(ref configurationData) != 0)
-
+                    IISConfigurationData configurationData = default;
+                    if (Http_get_application_properties(ref configurationData) != 0)
                     {
-
                         return;
-
                     }
-
-
 
                     sitePhysicalPath = configurationData.pwzFullApplicationPath;
-
                 }
 
-
-
                 Environment.CurrentDirectory = sitePhysicalPath;
-
             }
-
             catch
-
             {
-
                 // ignore
-
             }
-
         }
-
     }
 
     public class PublicUrl
