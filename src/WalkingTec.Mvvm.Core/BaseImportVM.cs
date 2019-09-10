@@ -912,6 +912,7 @@ namespace WalkingTec.Mvvm.Core
         /// 判断数据是否在库中存在重复数据
         /// </summary>
         /// <param name="Entity">要验证的数据</param>
+        /// <param name="checkCondition">checkCondition</param>
         /// <returns>null代表没有重复</returns>
         protected P IsDuplicateData(P Entity, DuplicatedInfo<P> checkCondition)
         {

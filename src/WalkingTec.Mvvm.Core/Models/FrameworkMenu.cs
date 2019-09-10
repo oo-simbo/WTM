@@ -28,6 +28,7 @@ namespace WalkingTec.Mvvm.Core
         [Required(ErrorMessage ="{0}是必填项")]
         public bool FolderOnly { get; set; }
 
+        [Obsolete("v2.2.47 版本开始已经弃用")]
         [Display(Name = "继承" )]
         [Required(ErrorMessage ="{0}是必填项")]
         public bool IsInherit { get; set; }
@@ -64,7 +65,7 @@ namespace WalkingTec.Mvvm.Core
         [Display(Name = "内部地址" )]
         [Required(ErrorMessage ="{0}是必填项")]
         public bool? IsInside { get; set; }
-        
+
         public string Url { get; set; }
 
         /// <summary>

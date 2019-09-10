@@ -164,7 +164,8 @@ namespace WalkingTec.Mvvm.Core
             {
                 var fname = DC.GetFKName2<TModel>(f.Name);
                 var fid = typeof(TModel).GetProperty(fname).GetValue(rv) as Guid?;
-                var file = DC.Set<FileAttachment>().Where(x => x.ID == fid).Select(x => new FileAttachment {
+                var file = DC.Set<FileAttachment>().Where(x => x.ID == fid).Select(x => new FileAttachment
+                {
                     ID = x.ID,
                     CreateBy = x.CreateBy,
                     CreateTime = x.CreateTime,
@@ -221,8 +222,8 @@ namespace WalkingTec.Mvvm.Core
                 (Entity as PersistPoco).IsValid = true;
             }
 
-                #region 更新子表
-                foreach (var pro in pros)
+            #region 更新子表
+            foreach (var pro in pros)
             {
                 //找到类型为List<xxx>的字段
                 if (pro.PropertyType.GenericTypeArguments.Count() > 0)
@@ -288,7 +289,7 @@ namespace WalkingTec.Mvvm.Core
             DC.Set<TModel>().Add(Entity);
 
             //删除不需要的附件
-            if(DeletedFileIds != null)
+            if (DeletedFileIds != null)
             {
                 foreach (var item in DeletedFileIds)
                 {
@@ -309,7 +310,7 @@ namespace WalkingTec.Mvvm.Core
         {
 
             //自动设定修改日期和修改人
-           if (typeof(TModel).GetTypeInfo().IsSubclassOf(typeof(BasePoco)))
+            if (typeof(TModel).GetTypeInfo().IsSubclassOf(typeof(BasePoco)))
             {
                 BasePoco ent = Entity as BasePoco;
                 if (ent.UpdateTime == null)
@@ -400,7 +401,7 @@ namespace WalkingTec.Mvvm.Core
                                 if (field.StartsWith("Entity." + pro.Name + "[0]."))
                                 {
                                     string name = field.Replace("Entity." + pro.Name + "[0].", "");
-                                        setnames.Add(name);
+                                    setnames.Add(name);
                                 }
                             }
 
@@ -417,7 +418,7 @@ namespace WalkingTec.Mvvm.Core
                                         var newitemType = item.GetType();
                                         foreach (var itempro in itemPros)
                                         {
-                                            if (!itempro.PropertyType.IsSubclassOf(typeof(TopBasePoco)) && (updateAllFields == true ||  setnames.Contains(itempro.Name)))
+                                            if (!itempro.PropertyType.IsSubclassOf(typeof(TopBasePoco)) && (updateAllFields == true || setnames.Contains(itempro.Name)))
                                             {
                                                 var notmapped = itempro.GetCustomAttribute<NotMappedAttribute>();
                                                 if (itempro.Name != "ID" && notmapped == null && itempro.PropertyType.IsList() == false)
@@ -465,7 +466,7 @@ namespace WalkingTec.Mvvm.Core
                         }
                         else if (FC.Keys.Contains("Entity." + pro.Name + ".DONOTUSECLEAR") || (pro.GetValue(Entity) is IEnumerable<TopBasePoco> list2 && list2?.Count() == 0))
                         {
-                            PropertyInfo[] itemPros = ftype.GetProperties();                            
+                            PropertyInfo[] itemPros = ftype.GetProperties();
                             var _entity = DC.Set<TModel>().Include(pro.Name).AsNoTracking().Where(x => x.ID == Entity.ID).FirstOrDefault();
                             if (_entity != null)
                             {
@@ -497,13 +498,13 @@ namespace WalkingTec.Mvvm.Core
                     if (field.StartsWith("Entity.") && !field.Contains("["))
                     {
                         string name = field.Replace("Entity.", "");
-                            try
-                            {
-                                DC.UpdateProperty(Entity, name);
-                            }
-                            catch (Exception)
-                            {
-                            }
+                        try
+                        {
+                            DC.UpdateProperty(Entity, name);
+                        }
+                        catch (Exception)
+                        {
+                        }
                     }
                 }
                 if (typeof(TModel).GetTypeInfo().IsSubclassOf(typeof(BasePoco)))
@@ -595,7 +596,7 @@ namespace WalkingTec.Mvvm.Core
                     ofa.DoDelete();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 MSD.AddModelError("", "数据使用中，无法删除");
             }
@@ -682,7 +683,7 @@ namespace WalkingTec.Mvvm.Core
                         }
                         //将字段名保存，为后面生成错误信息作准备
                         props.AddRange(field.GetProperties());
-                    }                   
+                    }
                     int count = 0;
                     if (conditions.Count > 1)
                     {
@@ -727,7 +728,7 @@ namespace WalkingTec.Mvvm.Core
                         //如果多个字段重复，则拼接形成 xx，yy，zz组合字段重复 这种提示
                         else if (props.Count > 1)
                         {
-                             MSD.AddModelError(GetValidationFieldName(props.First())[0], AllName + "字段组合重复");
+                            MSD.AddModelError(GetValidationFieldName(props.First())[0], AllName + "字段组合重复");
                         }
                     }
                 }
