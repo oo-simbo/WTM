@@ -1,4 +1,4 @@
-﻿<style>
+<style>
     a {
         color: #01aaed
     }
@@ -18,20 +18,20 @@
     <p>但是WTM框架支持SqlServer，MySql，PgSql等多种数据库，通过配置文件来决定使用哪种，而EF是不知道应该去哪里找的</p>
     <p>这种情况下，我们可以使用Design-time DbContext来手工指定需要同步的数据库，具体可以参考<a target="_blank" href="https://docs.microsoft.com/zh-cn/ef/core/miscellaneous/cli/dbcontext-creation">微软文档</a></p>
     <p>简单来说，就是在代码中创建一个继承IDesignTimeDbContextFactory的类，例如：</p>
-        <wt:code title="DataContextFactory.cs">
+    <wt:code title="DataContextFactory.cs">
 public class DataContextFactory : IDesignTimeDbContextFactory&lt;DataContext&gt;
 {
     public DataContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder&lt;DataContext&gt;();
-        //使用UseSqlServer，UseMySql，UseNpgsql等指定使用不同的数据库
-        optionsBuilder.UseMySql("这里指定完整的连接字符串");
-        return new DataContext(optionsBuilder.Options);
+        return new DataContext("你的完整连接字符串",DBTypeEnum.SqlServer);
     }
 }
 
     </wt:code>
     <p>加入上面这个类之后，我们就可以使用add-migration等方法了,EF会使用上面这个类中指定的数据库进行操作</p>
+    <wt:quote>
+      2.5.2之后生成的项目会自动在DataContext.cs里添加这个类
+    </wt:quote>
 </wt:fieldset>
 
 <wt:fieldset field-set-style="Simple" title="3. 使用数据库比较工具">
@@ -44,10 +44,10 @@ public class DataContextFactory : IDesignTimeDbContextFactory&lt;DataContext&gt;
     <p>如果只是更新了很少的字段，可以手工将数据库对应的表修改成跟model对应的结构就可以了</p>
 </wt:fieldset>
     <script>
-        layui.code({ about: false });
+    layui.use('code',function(){layui.code({ about: false })})
     </script>
     <script>
         layui.table.init('parse-table-demo', {
-            limit: 100 
+        limit: 100, page: false
         });
     </script>

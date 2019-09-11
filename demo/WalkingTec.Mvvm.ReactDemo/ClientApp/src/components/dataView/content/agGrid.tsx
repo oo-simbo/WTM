@@ -5,7 +5,7 @@
  * @modify date 2019-06-26 16:55:28
  * @desc [description]
  */
-import { ColDef, GridApi, GridReadyEvent, SelectionChangedEvent, SortChangedEvent } from 'ag-grid-community';
+import { ColDef, GridApi, GridReadyEvent, SelectionChangedEvent, SortChangedEvent, ColumnRowGroupChangedEvent } from 'ag-grid-community';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 // import 'ag-grid-community/dist/styles/ag-theme-bootstrap.css';
 import 'ag-grid-community/dist/styles/ag-theme-material.css';
@@ -36,7 +36,7 @@ interface ITableProps extends AgGridReactProps {
     /**
      * 行 操作
      */
-    rowAction?: React.ReactNode;
+    rowAction?: any;
     /**
      * 行 操作列配置
      */
@@ -73,9 +73,9 @@ const frameworkRender = {
     },
     // 布尔
     columnsRenderBoolean: (props) => {
-        return props.value ? <Switch checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="close" />} disabled defaultChecked /> : <Switch checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="close" />} disabled />
+        return (props.value === true || props.value === 'true') ? <Switch checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="close" />} disabled defaultChecked /> : <Switch checkedChildren={<Icon type="check" />} unCheckedChildren={<Icon type="close" />} disabled />
     },
-    // 下载 
+    // 下载
     columnsRenderDownload: (props) => {
         if (props.value) {
             return <div style={{ textAlign: "center" }} >
@@ -131,11 +131,12 @@ export class AgGrid extends React.Component<ITableProps, any> {
     resizeEvent: Subscription;
     minHeight = 400;
     state = {
+        sortable: true,
         height: this.minHeight
     }
     /**
-     * 修改 高度 
-     * @param refFullscreen 
+     * 修改 高度
+     * @param refFullscreen
      */
     @Debounce(200)
     onUpdateHeight(refFullscreen = false) {
@@ -147,10 +148,9 @@ export class AgGrid extends React.Component<ITableProps, any> {
             const refTable = this.refTableBody.current;//ReactDOM.findDOMNode(this.ref.current) as HTMLDivElement;
             // 60 是头部 标题栏 高度
             let height = window.innerHeight - refTable.offsetTop - 60 - 100;
-            // // 全屏 加回 60 高度
-            // if (refFullscreen) {
-            //     height += 60;
-            // }
+            if (!globalConfig.tabsPage) {
+                height += 90;
+            }
             height = height < this.minHeight ? this.minHeight : height;
             if (this.state.height !== height) {
                 this.gridApi.sizeColumnsToFit();
@@ -169,8 +169,8 @@ export class AgGrid extends React.Component<ITableProps, any> {
     // }
     /**
      * 分页 参数 改变回调
-     * @param current 
-     * @param pageSize 
+     * @param current
+     * @param pageSize
      */
     onChangePagination(current: number, pageSize: number) {
         console.log("TCL: App -> onChangePagination -> ", current, pageSize)
@@ -189,24 +189,35 @@ export class AgGrid extends React.Component<ITableProps, any> {
     }
     /**
      * 选择的 行 数据 回调
-     * @param event 
+     * @param event
      */
     onSelectionChanged(event: SelectionChangedEvent) {
         // console.log("TCL: App -> onSelectionChanged -> event", event.api.getSelectedRows())
         // event.api.getSelectedNodesById()
         this.props.Store.DataSource.selectedRowKeys = lodash.map(event.api.getSelectedRows(), 'key');
     }
-
-    componentDidMount() {
-        this.props.Store.onSearch();
+    onColumnRowGroupChanged(event: ColumnRowGroupChangedEvent) {
+        // this.setState({ sortable: event.columns.length > 0 })
+    }
+    async componentDidMount() {
         this.onUpdateHeight();
         this.resizeEvent = fromEvent(window, "resize").subscribe(e => {
-            this.onUpdateHeight(lodash.get(e, 'detail') === 'refFullscreen');
-            this.gridApi.sizeColumnsToFit();
+            // 获取当前高度 ，高度 为 0 说明页面属于隐藏状态
+            if (lodash.get(this.refTableBody.current, 'clientHeight', 0) > 0) {
+                if (!globalConfig.tabsPage) {
+                    this.onUpdateHeight(lodash.get(e, 'detail') === 'refFullscreen');
+                }
+                this.sizeColumnsToFit();
+            }
         });
+        await this.props.Store.onSearch();
+        this.sizeColumnsToFit()
     }
     componentWillUnmount() {
         this.resizeEvent && this.resizeEvent.unsubscribe()
+    }
+    sizeColumnsToFit() {
+        lodash.get(this.refTableBody.current, 'clientHeight', 0) && this.gridApi && this.gridApi.sizeColumnsToFit();
     }
     onGridReady(event: GridReadyEvent) {
         this.gridApi = event.api;
@@ -216,7 +227,7 @@ export class AgGrid extends React.Component<ITableProps, any> {
     public render() {
         let {
             Store,
-            rowAction,
+            rowAction: RowAction,
             rowActionCol,
             paginationProps,
             style,
@@ -262,7 +273,7 @@ export class AgGrid extends React.Component<ITableProps, any> {
         })
         return (
             <>
-                <div ref={this.refTableBody} style={{ height: this.state.height, ...style }} className={`lenovo-ag-grid ${className} ${theme}`}>
+                <div ref={this.refTableBody} style={{ height: this.state.height, ...style }} className={`app-ag-grid ${className} ${theme}`}>
                     {/* <Spin spinning={loading} > */}
                     <AgGridReact
                         // 内置 翻译 替换
@@ -283,7 +294,12 @@ export class AgGrid extends React.Component<ITableProps, any> {
                         {...props}
                         frameworkComponents={
                             {
-                                RowAction: rowAction,
+                                RowAction: (rowProps) => {
+                                    if (rowProps.data) {
+                                        return <RowAction {...rowProps} />;
+                                    }
+                                    return null;
+                                },
                                 ...frameworkRender,
                                 ...frameworkComponents,
                             }
@@ -294,6 +310,9 @@ export class AgGrid extends React.Component<ITableProps, any> {
                             sortable: true,
                             minWidth: 100,
                             ...defaultColDef
+                        }}
+                        autoGroupColumnDef={{
+                            sortable: false
                         }}
                         columnDefs={[
                             checkboxSelection && {
@@ -310,7 +329,7 @@ export class AgGrid extends React.Component<ITableProps, any> {
                             },
                             ...columnDefs,
                             // 固定右侧 操作列
-                            rowAction && {
+                            RowAction && {
                                 headerName: "操作",
                                 field: "RowAction",
                                 cellRenderer: 'RowAction',
@@ -320,7 +339,11 @@ export class AgGrid extends React.Component<ITableProps, any> {
                                 ...rowActionCol,
                             }
                         ].filter(Boolean)}
+                        // 分组改变
+                        onColumnRowGroupChanged={this.onColumnRowGroupChanged}
+                        // 选择框
                         onSelectionChanged={this.onSelectionChanged}
+                        // 排序
                         onSortChanged={this.onSortChanged}
                         onGridReady={event => {
                             onGridReady && onGridReady(event);

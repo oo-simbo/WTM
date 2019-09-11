@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Doc.FrameworkUserVms;
 using WalkingTec.Mvvm.Doc.Models;
+using WalkingTec.Mvvm.Doc.ViewModels.DepartmentVms;
 using WalkingTec.Mvvm.Doc.ViewModels.MajorVms;
 using WalkingTec.Mvvm.Doc.ViewModels.SchoolVms;
 using WalkingTec.Mvvm.Doc.ViewModels.StudentVms;
@@ -129,6 +130,27 @@ namespace WalkingTec.Mvvm.Doc.Controllers
             var vm = CreateVM<StudentVm>();
             return PartialView(vm);
         }
+
+        [ActionDescription("Tree")]
+        public IActionResult Tree()
+        {
+            var vm = CreateVM<DepartmentVM>();
+            return PartialView(vm);
+        }
+
+        [ActionDescription("树形容器")]
+        public IActionResult TreeContainer()
+        {
+            var vm = CreateVM<StudentListVm3>();
+            return PartialView(vm);
+        }
+
+        [ActionDescription("按钮")]
+        public IActionResult Button()
+        {
+            return PartialView();
+        }
+
 
         public IActionResult GetSchool(string keywords)
         {

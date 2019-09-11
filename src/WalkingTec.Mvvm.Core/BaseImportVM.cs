@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NPOI.HSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
@@ -756,7 +756,7 @@ namespace WalkingTec.Mvvm.Core
                     int propetyIndex = 0;
                     for (int i = 0; i < columnCount; i++)
                     {
-                        ExcelPropety excelPropety = CopyExcelPropety(excelPropetys[propetyIndex]); //excelPropetys[propetyIndex]; 
+                        ExcelPropety excelPropety = CopyExcelPropety(excelPropetys[propetyIndex]); //excelPropetys[propetyIndex];
                         var pts = propetys[propetyIndex];
                         string value = row.GetCell(i, MissingCellPolicy.CREATE_NULL_AS_BLANK).ToString();
 
@@ -908,11 +908,12 @@ namespace WalkingTec.Mvvm.Core
         #endregion
 
         #region 验证数据重复
+
         /// <summary>
         /// 判断数据是否在库中存在重复数据
         /// </summary>
         /// <param name="Entity">要验证的数据</param>
-        /// <param name="checkCondition">checkCondition</param>
+        /// <param name="checkCondition">验证表达式</param>
         /// <returns>null代表没有重复</returns>
         protected P IsDuplicateData(P Entity, DuplicatedInfo<P> checkCondition)
         {

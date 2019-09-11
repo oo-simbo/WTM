@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Core.Extensions;
@@ -55,7 +55,7 @@ namespace WalkingTec.Mvvm.Mvc
         public IActionResult DoGen(CodeGenVM vm)
         {
             vm.DoGen();
-            return FFResult().CloseDialog().Alert("生成成功！");
+            return FFResult().Alert("生成成功！请关闭调试重新编译运行。");
         }
 
         [ActionDescription("预览")]
@@ -64,12 +64,12 @@ namespace WalkingTec.Mvvm.Mvc
         {
             if (vm.PreviewFile == "Controller")
             {
-                ViewData["filename"] = vm.ModelName + "Controller.cs";
+                ViewData["filename"] = $"{vm.ModelName}{(vm.IsApi == true ? "Api" : "")}Controller.cs";
                 ViewData["code"] = vm.GenerateController();
             }
             else if(vm.PreviewFile == "Searcher" || vm.PreviewFile.EndsWith("VM"))
             {
-                ViewData["filename"] = vm.ModelName + vm.PreviewFile.Replace("CrudVM","VM") + ".cs";
+                ViewData["filename"] = vm.ModelName + $"{(vm.IsApi == true ? "Api" : "")}" + vm.PreviewFile.Replace("CrudVM","VM") + ".cs";
                 ViewData["code"] = vm.GenerateVM(vm.PreviewFile);
             }
             else if(vm.UI == UIEnum.React)

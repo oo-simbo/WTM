@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,11 +18,11 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ApiController]
     [Route("api/_[controller]")]
     [WTMAuthorize]
-	public class FrameworkRoleController : BaseApiController
+    public class FrameworkRoleController : BaseApiController
     {
         [ActionDescription("搜索")]
         [HttpPost("Search")]
-		public string Search(FrameworkRoleSearcher searcher)
+        public string Search(FrameworkRoleSearcher searcher)
         {
             var vm = CreateVM<FrameworkRoleListVM>();
             vm.Searcher = searcher;
@@ -113,7 +113,7 @@ namespace WalkingTec.Mvvm.Admin.Api
             }
         }
 
-		[HttpPost("BatchDelete")]
+        [HttpPost("BatchDelete")]
         [ActionDescription("删除")]
         public IActionResult BatchDelete(Guid[] ids)
         {

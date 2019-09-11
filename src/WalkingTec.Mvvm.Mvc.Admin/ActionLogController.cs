@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -17,11 +17,11 @@ namespace WalkingTec.Mvvm.Admin.Api
     [ApiController]
     [Route("api/_[controller]")]
     [WTMAuthorize]
-	public class ActionLogController : BaseApiController
+    public class ActionLogController : BaseApiController
     {
         [ActionDescription("搜索")]
         [HttpPost("Search")]
-		public string Search(ActionLogSearcher searcher)
+        public string Search(ActionLogSearcher searcher)
         {
             var vm = CreateVM<ActionLogListVM>();
             vm.Searcher = searcher;

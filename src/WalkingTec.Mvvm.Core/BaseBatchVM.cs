@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -209,14 +209,10 @@ namespace WalkingTec.Mvvm.Core
                 {
                     //如果找不到对应数据，则输出错误
                     TModel entity = null;
-                    if (vm == null)
+                    entity = DC.Set<TModel>().Find(idsData[i]);
+                    if (vm != null)
                     {
-                        entity = DC.Set<TModel>().Find(idsData[i]);
-                    }
-                    else
-                    {
-                        vm.SetEntityById(idsData[i]);
-                        entity = vm.Entity;
+                        vm.SetEntity(entity);
                     }
                     if (entity == null)
                     {
@@ -228,9 +224,19 @@ namespace WalkingTec.Mvvm.Core
                     foreach (var pro in pros)
                     {
                         var proToSet = entity.GetType().GetProperty(pro.Name);
-                        if (proToSet != null && FC["LinkedVM." + pro.Name] != null && FC["LinkedVM." + pro.Name] != StringValues.Empty)
+                        var val = FC.ContainsKey("LinkedVM." + pro.Name) ? FC["LinkedVM." + pro.Name] : null;
+                        if (proToSet != null && val != null)
                         {
-                            proToSet.SetValue(entity, pro.GetValue(LinkedVM));
+                            var hasvalue = false;
+                            if (val is StringValues sv && StringValues.IsNullOrEmpty(sv) == false)
+                            {
+                                hasvalue = true;
+
+                            }
+                            if (hasvalue)
+                            {
+                                proToSet.SetValue(entity, pro.GetValue(LinkedVM));
+                            }
                         }
                     }
                     //如果有对应的BaseCRUDVM则使用其进行数据验证
@@ -243,7 +249,7 @@ namespace WalkingTec.Mvvm.Core
                             var error = "";
                             foreach (var key in errors.Keys)
                             {
-                                if(errors[key].Count > 0)
+                                if (errors[key].Count > 0)
                                 {
                                     error += errors[key].Select(x => x.ErrorMessage).ToSpratedString();
                                 }

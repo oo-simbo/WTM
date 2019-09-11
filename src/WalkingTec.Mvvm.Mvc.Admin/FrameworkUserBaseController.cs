@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using WalkingTec.Mvvm.Core;
@@ -13,16 +12,15 @@ using WalkingTec.Mvvm.Mvc.Auth;
 
 namespace WalkingTec.Mvvm.Admin.Api
 {
-
     [ActionDescription("用户管理")]
     [ApiController]
     [Route("api/_FrameworkUserBase")]
     [WTMAuthorize]
-	public class FrameworkUserController : BaseApiController
+    public class FrameworkUserController : BaseApiController
     {
         [ActionDescription("搜索")]
         [HttpPost("Search")]
-		public string Search(FrameworkUserSearcher searcher)
+        public string Search(FrameworkUserSearcher searcher)
         {
             var vm = CreateVM<FrameworkUserListVM>();
             vm.Searcher = searcher;
@@ -83,9 +81,6 @@ namespace WalkingTec.Mvvm.Admin.Api
             }
         }
 
-
-
-
         [HttpPost("BatchDelete")]
         [ActionDescription("删除")]
         public IActionResult BatchDelete(Guid[] ids)
@@ -108,7 +103,6 @@ namespace WalkingTec.Mvvm.Admin.Api
                 return Ok(ids.Count());
             }
         }
-
 
         [ActionDescription("导出")]
         [HttpPost("ExportExcel")]
@@ -167,7 +161,6 @@ namespace WalkingTec.Mvvm.Admin.Api
                 return Ok(vm.EntityList.Count);
             }
         }
-
 
         [HttpGet("GetFrameworkRoles")]
         [ActionDescription("获取角色")]

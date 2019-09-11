@@ -34,7 +34,7 @@ namespace WalkingTec.Mvvm.Admin.Api
             vm = FileHelper.GetFileByteForUpload(vm, FileData.OpenReadStream(), ConfigInfo, FileData.FileName, sm);
             vm.Entity.IsTemprory = true;
 
-            if(string.IsNullOrEmpty(vm.Entity.Path) && vm.Entity.SaveFileMode == SaveFileModeEnum.Local)
+            if (string.IsNullOrEmpty(vm.Entity.Path) && vm.Entity.SaveFileMode == SaveFileModeEnum.Local)
             {
                 return BadRequest("服务端没有配置储存文件的地址");
             }
@@ -46,7 +46,7 @@ namespace WalkingTec.Mvvm.Admin.Api
             {
                 return BadRequest("上传失败");
             }
-             vm.DoAdd();
+            vm.DoAdd();
             return Ok(new { Id = vm.Entity.ID.ToString(), Name = vm.Entity.FileName });
         }
 

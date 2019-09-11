@@ -1,5 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using MySql.Data.MySqlClient;
+using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;
 using NPOI.HSSF.UserModel;
@@ -52,15 +53,27 @@ namespace WalkingTec.Mvvm.Core
             return null;
         }
 
+        private int? _childrenDepth;
+
         /// <summary>
         /// 多级表头深度  默认 1级
         /// </summary>
-        public int ChildrenDepth { get; set; }
-
+        public int ChildrenDepth
+        {
+            get
+            {
+                if (_childrenDepth == null)
+                {
+                    _childrenDepth = _getHeaderDepth();
+                }
+                return _childrenDepth.Value;
+            }
+        }
 
         /// <summary>
         /// GridHeaders
         /// </summary>
+        [JsonIgnore]
         public IEnumerable<IGridColumn<TModel>> GridHeaders { get; set; }
 
         /// <summary>
@@ -76,10 +89,21 @@ namespace WalkingTec.Mvvm.Core
             return GridHeaders;
         }
 
+        /// <summary>
+        /// 计算多级表头深度
+        /// </summary>
+        /// <returns></returns>
+        private int _getHeaderDepth()
+        {
+            IEnumerable<IGridColumn<TModel>> headers = GetHeaders();
+            return headers.Max(x => x.MaxDepth);
+        }
         private List<GridAction> _gridActions;
+
         /// <summary>
         /// 页面动作
         /// </summary>
+        [JsonIgnore]
         public List<GridAction> GridActions
         {
             get
@@ -169,7 +193,7 @@ namespace WalkingTec.Mvvm.Core
                 var dr = sheets[sheetindex].CreateRow(rowIndex - sheetindex * 60000) as HSSFRow;
                 foreach (var baseCol in GridHeaders)
                 {
-                    //处理枚举变量的多语言 
+                    //处理枚举变量的多语言
                     bool IsEmunBoolParp = false;
                     var proType = baseCol.FieldType;
                     if (proType.IsEnumOrNullableEnum())
@@ -183,7 +207,7 @@ namespace WalkingTec.Mvvm.Core
                         //获取数据，并过滤特殊字符
                         string text = Regex.Replace(col.GetText(row).ToString(), @"<[^>]*>", String.Empty);
 
-                        //处理枚举变量的多语言 
+                        //处理枚举变量的多语言
 
                         if (IsEmunBoolParp)
                         {
@@ -398,6 +422,7 @@ namespace WalkingTec.Mvvm.Core
         /// <summary>
         /// 替换查询条件，如果被赋值，则列表会使用里面的Lambda来替换原有Query里面的Where条件
         /// </summary>
+        [JsonIgnore()]
         public Expression<Func<TopBasePoco, bool>> ReplaceWhere { get; set; }
 
         /// <summary>
@@ -613,7 +638,7 @@ namespace WalkingTec.Mvvm.Core
                         }
                         if (Searcher.Limit == 0)
                         {
-                            Searcher.Limit = ConfigInfo?.RPP ?? 20;
+                            Searcher.Limit = ConfigInfo?.UiOptions.DataTable.RPP ?? 20;
                         }
                         //根据返回数据的数量，以及预先设定的每页行数来设定数据量和总页数
                         Searcher.Count = count;
@@ -870,7 +895,7 @@ namespace WalkingTec.Mvvm.Core
             if (root != null)
             {
                 var aroot = root as List<GridColumn<TModel>>;
-                var remove = aroot.Where(x => x.ColumnType == GridColumnTypeEnum.Action || x.FieldName.ToLower() == "id").ToList();
+                var remove = aroot.Where(x => x.ColumnType == GridColumnTypeEnum.Action || x.Hide == true || x.FieldName?.ToLower() == "id").ToList();
                 foreach (var item in remove)
                 {
                     aroot.Remove(item);
@@ -879,7 +904,7 @@ namespace WalkingTec.Mvvm.Core
                 {
                     if (child.Children != null && child.Children.Count() > 0)
                     {
-                        RemoveActionColumn(child.Children);
+                        RemoveActionAndIdColumn(child.Children);
                     }
                 }
             }

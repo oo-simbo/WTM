@@ -1,4 +1,4 @@
-﻿namespace WalkingTec.Mvvm.Core
+namespace WalkingTec.Mvvm.Core
 {
     /// <summary>
     /// 列表操作列类型
@@ -26,17 +26,17 @@
     /// <summary>
     /// 数据库类型
     /// </summary>
-    public enum DBTypeEnum { SqlServer, MySql, PgSql,Memory }
+    public enum DBTypeEnum { SqlServer, MySql, PgSql, Memory, SQLite, Oracle }
 
     /// <summary>
     /// 页面显示方式
     /// </summary>
-    public enum PageModeEnum { Single, Tab}
+    public enum PageModeEnum { Single, Tab }
 
     /// <summary>
     /// Tab页的显示方式
     /// </summary>
-    public enum TabModeEnum { Default, Simple}
+    public enum TabModeEnum { Default, Simple }
 
     /// <summary>
     /// Notification出现的位置

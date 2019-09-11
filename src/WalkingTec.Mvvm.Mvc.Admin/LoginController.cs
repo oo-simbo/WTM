@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,8 +16,9 @@ namespace WalkingTec.Mvvm.Admin.Api
 {
     [ApiController]
     [Route("api/_login")]
+    [ActionDescription("登陆")]
     [Public]
-    public class LoginController : BaseApiController
+    public class _LoginController : BaseApiController
     {
         [HttpPost("login")]
         [ActionDescription("登录")]
@@ -70,14 +70,14 @@ namespace WalkingTec.Mvvm.Admin.Api
                 .Where(x => x.UserId == user.ID || (x.RoleId != null && roleIDs.Contains(x.RoleId.Value)))
                 .Select(x => x.MenuItem)
                 .Where(x => x.MethodName == null)
-                .OrderBy(x=>x.DisplayOrder)
+                .OrderBy(x => x.DisplayOrder)
                 .Select(x => new SimpleMenu
                 {
                     Id = x.ID.ToString().ToLower(),
                     ParentId = x.ParentId.ToString().ToLower(),
                     Text = x.PageName,
                     Url = x.Url,
-                    Icon = (x.IConId == null ? x.CustumIcon : x.IConId.ToString())
+                    Icon = x.ICon
                 });
             ms.AddRange(menus);
 
@@ -131,13 +131,13 @@ namespace WalkingTec.Mvvm.Admin.Api
                     .Where(x => x.MethodName == null)
                   .OrderBy(x => x.DisplayOrder)
                   .Select(x => new SimpleMenu
-                    {
-                        Id = x.ID.ToString().ToLower(),
-                        ParentId = x.ParentId.ToString().ToLower(),
-                        Text = x.PageName,
-                        Url = x.Url,
-                        Icon = (x.IConId == null ? x.CustumIcon : x.IConId.ToString())
-                    });
+                  {
+                      Id = x.ID.ToString().ToLower(),
+                      ParentId = x.ParentId.ToString().ToLower(),
+                      Text = x.PageName,
+                      Url = x.Url,
+                      Icon = x.ICon
+                  });
                 ms.AddRange(menus);
 
                 List<string> urls = new List<string>();

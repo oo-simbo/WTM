@@ -1,19 +1,18 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using WalkingTec.Mvvm.Core;
-using WalkingTec.Mvvm.Core.Extensions;
 using System.Collections.Generic;
 using System.Reflection;
 using WalkingTec.Mvvm.Core.Implement;
-using System.Threading.Tasks;
 using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Text.RegularExpressions;
+using System.Text;
 
 namespace WalkingTec.Mvvm.Mvc.Filters
 {
@@ -57,8 +56,8 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                 context.HttpContext.Response.Headers.Add("Access-Control-Allow-Credentials", "true");
                 context.HttpContext.Response.Headers.Add("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
                 context.HttpContext.Response.Headers.Add("Access-Control-Allow-Headers", "Origin, No-Cache, X-Requested-With, If-Modified-Since, Pragma, Last-Modified, Cache-Control, Expires, Content-Type, X-E4M-With,userId,token");
-
             }
+
             log.ITCode = ctrl.LoginUserInfo?.ITCode ?? string.Empty;
             //给日志的多语言属性赋值
             log.ModuleName = ctrlDes?.Description ?? ctrlActDesc.ControllerName;
@@ -130,7 +129,28 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                         }
 
                     }
-
+                    if (model is IBaseCRUDVM<TopBasePoco> crud)
+                    {
+                        var pros = crud.Entity.GetType().GetProperties();
+                        foreach (var pro in pros)
+                        {
+                            //找到类型为List<xxx>的字段
+                            if (pro.PropertyType.GenericTypeArguments.Count() > 0)
+                            {
+                                //获取xxx的类型
+                                var ftype = pro.PropertyType.GenericTypeArguments.First();
+                                //如果xxx继承自TopBasePoco
+                                if (ftype.IsSubclassOf(typeof(TopBasePoco)))
+                                {
+                                    //界面传过来的子表数据
+                                    if (pro.GetValue(crud.Entity) is IEnumerable<TopBasePoco> list && list.Count() == 0)
+                                    {
+                                        pro.SetValue(crud.Entity, null);
+                                    }
+                                }
+                            }
+                        }
+                    }
                     //如果ViewModel T继承自IBaseBatchVM<BaseVM>，则自动为其中的ListVM和EditModel初始化数据
                     if (model is IBaseBatchVM<BaseVM>)
                     {
@@ -153,16 +173,12 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                             {
                                 self.RemoveActionColumn();
                                 self.RemoveAction();
-                                //if (temp.ErrorMessage.Count > 0)
-                                //{
                                 self.AddErrorColumn();
-                                //}
                             };
                             if (temp.ListVM.Searcher != null)
                             {
                                 var searcher = temp.ListVM.Searcher;
                                 searcher.CopyContext(model);
-                                //searcher.DoReInit();
                             }
                             temp.ListVM.DoInitListVM();
                         }
@@ -175,7 +191,6 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                         template.DoReInit();
                     }
                     model.Validate();
-                    //SetReinit
                     var invalid = ctrl.ModelState.Where(x => x.Value.ValidationState == Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Invalid).Select(x => x.Key).ToList();
                     if ((ctrl as ControllerBase).Request.Method.ToLower() == "put" || validpostonly != null)
                     {
@@ -218,6 +233,8 @@ namespace WalkingTec.Mvvm.Mvc.Filters
             base.OnActionExecuting(context);
         }
 
+
+
         public override void OnActionExecuted(ActionExecutedContext context)
         {
             var ctrl = context.Controller as BaseController;
@@ -239,7 +256,7 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                 // 为所有 PartialView 加上最外层的 Div
                 if (model != null)
                 {
-                    string pagetitle = "";
+                    string pagetitle = string.Empty;
                     var menu = Utils.FindMenu(context.HttpContext.Request.Path);
                     if (menu == null)
                     {
@@ -266,9 +283,11 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                         }
                         pagetitle += menu.PageName;
                     }
-                    context.HttpContext.Response.Cookies.Append("pagetitle", pagetitle);
+                    if (string.IsNullOrEmpty(pagetitle) == false)
+                    {
+                        context.HttpContext.Response.Headers.Add("X-wtm-PageTitle", Convert.ToBase64String(Encoding.UTF8.GetBytes(pagetitle)));
+                    }
                     context.HttpContext.Response.Cookies.Append("divid", model.ViewDivId);
-
                 }
             }
             if (context.Result is ViewResult)
@@ -310,7 +329,7 @@ namespace WalkingTec.Mvvm.Mvc.Filters
                     log.ActionUrl = context.HttpContext.Request.Path;
                     log.IP = context.HttpContext.GetRemoteIpAddress();
                     log.Remark = context.Exception?.ToString() ?? string.Empty;
-                    if(string.IsNullOrEmpty(log.Remark) == false && log.Remark.Length > 1000)
+                    if (string.IsNullOrEmpty(log.Remark) == false && log.Remark.Length > 1000)
                     {
                         log.Remark = log.Remark.Substring(0, 1000);
                     }

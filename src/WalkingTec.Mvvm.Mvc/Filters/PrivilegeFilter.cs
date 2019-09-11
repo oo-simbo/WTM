@@ -1,5 +1,6 @@
 ﻿using System;
-
+using System.Linq;
+using System.Web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -38,10 +39,10 @@ namespace WalkingTec.Mvvm.Mvc.Filters
             if (controller is BaseApiController)
             {
                 var lg = GlobalServices.GetRequiredService<LinkGenerator>();
-                var u = lg.GetPathByAction(ad.ActionName, ad.ControllerName);
+                var u = lg.GetPathByAction(ad.ActionName, ad.ControllerName, new { area = context.RouteData.Values["area"] });
                 if (u == null)
                 {
-                    u = lg.GetPathByAction(ad.ActionName, ad.ControllerName, new { id = 0 });
+                    u = lg.GetPathByAction(ad.ActionName, ad.ControllerName, new { area = context.RouteData.Values["area"], id = 0 });
                 }
                 if (u.EndsWith("/0"))
                 {
@@ -92,27 +93,27 @@ namespace WalkingTec.Mvvm.Mvc.Filters
             //    return;
             //}
 
-            //if (controller.LoginUserInfo == null)
-            //{
-            //    var publicMenu = controller.GlobaInfo.AllMenus
-            //                   .Where(x => x.Url != null
-            //                       && x.Url.ToLower() == "/" + ad.ControllerName.ToLower() + "/" + ad.ActionName
-            //                       && x.IsPublic == true)
-            //                   .FirstOrDefault();
-            //    if (publicMenu == null)
-            //    {
-            //        if (controller is BaseController c)
-            //        {
-            //            context.Result = new ContentResult { Content = $"<script>window.location.href = '/Login/Login?rd={HttpUtility.UrlEncode(controller.BaseUrl)}'</script>", ContentType = "text/html" };
-            //        }
-            //        else if (controller is ControllerBase c2)
-            //        {
-            //            context.Result = c2.Forbid();
-            //        }
-            //        return;
-            //    }
-            //}
-            //else
+            // if (controller.LoginUserInfo == null)
+            // {
+            //     var publicMenu = controller.GlobaInfo.AllMenus
+            //                    .Where(x => x.Url != null
+            //                        && x.Url.ToLower() == "/" + ad.ControllerName.ToLower() + "/" + ad.ActionName
+            //                        && x.IsPublic == true)
+            //                    .FirstOrDefault();
+            //     if (publicMenu == null)
+            //     {
+            //         if (controller is BaseController c)
+            //         {
+            //             context.Result = new ContentResult { Content = $"<script>window.location.href = '/Login/Login?rd={HttpUtility.UrlEncode(controller.BaseUrl)}'</script>", ContentType = "text/html" };
+            //         }
+            //         else if (controller is ControllerBase c2)
+            //         {
+            //             context.Result = c2.Unauthorized();
+            //         }
+            //         return;
+            //     }
+            // }
+            // else
             {
                 if (isAllRights == false)
                 {

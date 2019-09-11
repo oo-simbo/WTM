@@ -1,7 +1,8 @@
-﻿@model WalkingTec.Mvvm.Doc.ViewModels.StudentVms.StudentVm
+@model WalkingTec.Mvvm.Doc.ViewModels.StudentVms.StudentVm
 
 <wt:fieldset field-set-style="Simple" title="Combobox">
-    <p>Combobox的常用属性有：</p>
+ </wt:fieldset>
+   <p>Combobox的常用属性有：</p>
         <table lay-filter="parse-table-demo">
             <thead>
                 <tr>
@@ -95,7 +96,7 @@
         </table>
     <wt:quote>
         <p>
-            Combobox 支持直接绑定枚举，布尔字段，也支持通过 Items 属性设置数据源，Items需要绑定一个List&lt;ComboSelectListItem&gt;,
+            Combobox 支持直接绑定枚举，布尔字段，也支持通过 Items 属性设置数据源，Items需要绑定一个List<ComboSelectListItem>,
             ComboSelectListItem 是框架提供的辅助类，有 Text，Value，Selected 和 Disabled 4个属性，
             其中 Disabled 目前是专门为 Transfer 组件新增的属性，用于禁用某些特定 Item 的修改。
         </p>
@@ -113,7 +114,7 @@
             </wt:tabheaders>
             <wt:tabcontents>
                 <wt:tabcontent>
-                    <wt:form vm="@Model" width="600">
+                    <wt:form vm="@Model" style="max-width:600px;">
                         <wt:combobox field="Entity.Sex" />
                         <wt:combobox field="Entity.IsValid" />
                         <wt:combobox field="Entity.IsValid" yes-text="真的是" no-text="真不是" />
@@ -145,13 +146,13 @@
                 </wt:tabcontent>
             </wt:tabcontents>
         </wt:tab>
-</wt:fieldset>
 
 <wt:fieldset field-set-style="Simple" title="联动">
     <wt:quote>
         <p>ComboBox可以开启联动功能，方法是设置LinkedField和TriggerUrl</p>
-        <p>LinkField指向vm中的某个字段，框架会寻找是否有其他Combobox绑定了这个字段，并把找到的Combobox作为联动的目标</p>
-        <p>TriggerUrl接受一个名为id的参数，返回Text,Value数组形式的json</p>
+        <p>LinkField指向vm中的某个字段，框架会寻找是否有其他Combobox,CheckBox,Radio,Tree控件绑定了这个字段，并把找到的控件作为联动的目标</p>
+        <p>TriggerUrl接受一个名为id的参数，返回Text,Value数组形式的json，如果联动的是Tree控件，则需要返会TreeSelectListItem格式的json</p>
+        <p>框架提供了GetSelectListItems，以及GetTreeSelectListItems函数，可以方便的从数据库读取数据并生成两种格式的数据</p>
     </wt:quote>
     <wt:tab>
         <wt:tabheaders>
@@ -160,7 +161,7 @@
         </wt:tabheaders>
         <wt:tabcontents>
             <wt:tabcontent>
-                <wt:form vm="@Model" width="600">
+                <wt:form vm="@Model" style="max-width:600px;">
                     <wt:combobox field="SelectedSchool3" label-text="学校" items="AllSchools" link-field="SelectedMajor" trigger-url="/UI/GetMajorBySchool"/>
                     <wt:combobox field="SelectedMajor" label-text="专业"/>
                     <wt:row align="AlignEnum.Right">
@@ -217,8 +218,8 @@ public IActionResult GetMajorBySchool(string id)
 
 </wt:fieldset>
     <script>
-        layui.code({ about: false });
+    layui.use('code',function(){layui.code({ about: false })})
         layui.table.init('parse-table-demo', {
-            limit: 100 
+        limit: 100, page: false
         });
     </script>
