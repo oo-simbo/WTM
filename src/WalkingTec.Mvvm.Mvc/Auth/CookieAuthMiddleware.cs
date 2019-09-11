@@ -2,9 +2,9 @@
 // CookieAuthMiddleware.cs
 //
 // Author:
-//       Vito <wuwenhao0327@gmail.com>
+//       Michael,Vito
 //
-// Copyright (c) 2019 Vito
+// Copyright (c) 2019 WTM
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,12 @@ namespace WalkingTec.Mvvm.Mvc.Auth
         {
             if (_publicUrls == null)
             {
-                var res = GlobalServices.GetRequiredService<GlobalData>().AllPublicUrls;
+                var globalData = GlobalServices.GetRequiredService<GlobalData>();
+
+                var dbPublicUrls = globalData.AllMenus.Where(x => x.IsPublic == true && !string.IsNullOrEmpty(x.Url)).Select(x => x.Url.ToLower()).ToList();
+                dbPublicUrls.AddRange(globalData.AllPublicUrls);
+                var res = dbPublicUrls.ToArray();
+
                 _publicUrls = new string[res.Length];
                 for (int i = 0; i < res.Length; i++)
                 {
@@ -64,9 +69,10 @@ namespace WalkingTec.Mvvm.Mvc.Auth
                 var loginUserInfo = context?.Session?.Get<LoginUserInfo>("UserInfo");
                 if (loginUserInfo == null || Guid.Empty == loginUserInfo.Id)// 未登录
                 {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    context.Response.ContentType = "text/html";
-                    await context.Response.WriteAsync($"<script>window.location.href = '/Login/Login?rd={HttpUtility.UrlEncode(context.Request.Path)}'</script>");
+                    context.Response.Redirect($"/Login/Login?rd={HttpUtility.UrlEncode(context.Request.Path)}");
+                    //context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    //context.Response.ContentType = "text/html";
+                    //await context.Response.WriteAsync($"<script>window.location.href = '/Login/Login?rd={HttpUtility.UrlEncode(context.Request.Path)}'</script>");
                 }
                 else
                 {

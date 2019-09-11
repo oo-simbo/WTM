@@ -202,10 +202,17 @@ namespace WalkingTec.Mvvm.Mvc
                         if (userInfo != null)
                         {
                             // 初始化用户信息
+                            var roleIDs = userInfo.UserRoles.Select(x => x.RoleId).ToList();
                             var groupIDs = userInfo.UserGroups.Select(x => x.GroupId).ToList();
                             var dpris = DC.Set<DataPrivilege>()
                                             .Where(x => x.UserId == userInfo.ID || (x.GroupId != null && groupIDs.Contains(x.GroupId.Value)))
                                             .ToList();
+
+                            //查找登录用户的页面权限
+                            var funcPrivileges = DC.Set<FunctionPrivilege>()
+                                .Where(x => x.UserId == userInfo.ID || (x.RoleId != null && roleIDs.Contains(x.RoleId.Value)))
+                                .ToList();
+
                             _loginUserInfo = new LoginUserInfo
                             {
                                 Id = userInfo.ID,
@@ -214,16 +221,20 @@ namespace WalkingTec.Mvvm.Mvc
                                 PhotoId = userInfo.PhotoId,
                                 Roles = DC.Set<FrameworkRole>().Where(x => userInfo.UserRoles.Select(y => y.RoleId).Contains(x.ID)).ToList(),
                                 Groups = DC.Set<FrameworkGroup>().Where(x => userInfo.UserGroups.Select(y => y.GroupId).Contains(x.ID)).ToList(),
-                                DataPrivileges = dpris
+                                DataPrivileges = dpris,
+                                FunctionPrivileges = funcPrivileges
                             };
                         }
                         else
                         {
                             // 登录失败
                             HttpContext.Response.Cookies.Delete($"{ConfigInfo.CookiePre}.access_token");
-                            HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                            HttpContext.Response.ContentType = "text/html";
-                            HttpContext.Response.WriteAsync($"<script>window.location.href = '/Login/Login?rd={HttpUtility.UrlEncode(HttpContext.Request.Path)}'</script>").Wait();
+                            
+                            HttpContext.Response.Redirect($"/Login/Login?rd={HttpUtility.UrlEncode(HttpContext.Request.Path)}");
+
+                            //HttpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            //HttpContext.Response.ContentType = "text/html";
+                            //HttpContext.Response.WriteAsync($"<script>window.location.href = '/Login/Login?rd={HttpUtility.UrlEncode(HttpContext.Request.Path)}'</script>").Wait();
                         }
                     }
                 }

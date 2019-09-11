@@ -2,9 +2,9 @@
 // AuthService.cs
 //
 // Author:
-//       Vito <wuwenhao0327@gmail.com>
+//       Michael,Vito
 //
-// Copyright (c) 2019 Vito
+// Copyright (c) 2019 WTM
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -28,10 +28,8 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
@@ -41,53 +39,13 @@ using WalkingTec.Mvvm.Core.Models;
 
 namespace WalkingTec.Mvvm.Mvc.Auth
 {
-    public class JwtCookieDataFormat : ISecureDataFormat<AuthenticationTicket>
-    {
-        private readonly JwtOptions _jwtOptions;
-        public JwtCookieDataFormat(JwtOptions jwtOptions)
-        {
-            _jwtOptions = jwtOptions;
-        }
-
-        public string Protect(AuthenticationTicket data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public string Protect(AuthenticationTicket data, string purpose)
-        {
-            throw new NotImplementedException();
-        }
-
-        public AuthenticationTicket Unprotect(string protectedText)
-        {
-            return Unprotect(protectedText, null);
-        }
-
-        public AuthenticationTicket Unprotect(string protectedText, string purpose)
-        {
-            var jwtHandler = new JwtSecurityTokenHandler();
-            var tokenParam = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidIssuer = _jwtOptions.Issuer,
-                ValidateAudience = true,
-                ValidAudience = _jwtOptions.Audience,
-                ValidateIssuerSigningKey = false,
-                IssuerSigningKey = _jwtOptions.SymmetricSecurityKey,
-                ValidateLifetime = true
-            };
-            var principal = jwtHandler.ValidateToken(protectedText, tokenParam, out SecurityToken validatedToken);
-            return new AuthenticationTicket(principal, new AuthenticationProperties(), CookieAuthenticationDefaults.AuthenticationScheme);
-        }
-    }
-
     public class AuthService : IAuthService
     {
         private readonly ILogger _logger;
         private readonly JwtOptions _jwtOptions;
         private readonly Configs _configs;
         private readonly IDataContext _dc;
+        public IDataContext DC => _dc;
 
         private const Token _emptyToken = null;
 
@@ -101,7 +59,7 @@ namespace WalkingTec.Mvvm.Mvc.Auth
             _dc = CreateDC();
         }
 
-        public async Task<Token> Issue(LoginUserInfo loginUserInfo)
+        public async Task<Token> IssueToken(LoginUserInfo loginUserInfo)
         {
             if (loginUserInfo == null)
                 throw new ArgumentNullException(nameof(loginUserInfo));
