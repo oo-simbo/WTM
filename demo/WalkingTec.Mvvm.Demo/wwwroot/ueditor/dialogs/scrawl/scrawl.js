@@ -637,9 +637,9 @@ function exec(scrawlObj) {
                     if (!scrawlObj.isCancelScrawl) {
                         var responseObj;
                         responseObj = eval("(" + xhr.responseText + ")");
-                        if (responseObj.Msg == "success") {
+                        if (responseObj.Code == "200") {
                             var imgObj = {},
-                                url = editor.options.scrawlUrlPrefix + responseObj.Data.ID;
+                                url = editor.options.scrawlUrlPrefix + responseObj.Data.src;
                             imgObj.src = url;
                             imgObj._src = url;
                             imgObj.alt = responseObj.Data.FileName || '';

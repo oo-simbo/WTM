@@ -353,7 +353,6 @@ namespace WalkingTec.Mvvm.Mvc
             return Json(new { Id = string.Empty, Name = string.Empty }, StatusCodes.Status404NotFound);
         }
 
-
         [HttpPost]
         [ActionDescription("UploadForLayUIRichTextBox")]
         public IActionResult UploadForLayUIRichTextBox(string _DONOT_USE_CS = "default")
@@ -871,5 +870,106 @@ namespace WalkingTec.Mvvm.Mvc
             return Json(IconFontsHelper.IconFontDicItems[id]);
         }
 
+        [Public]
+        [HttpPost]
+        [ActionDescription("UploadForLayUIUEditor")]
+        public IActionResult UploadForLayUIUEditor(string _DONOT_USE_CS = "default")
+        {
+            CurrentCS = _DONOT_USE_CS ?? "default";
+            var sm = ConfigInfo.FileUploadOptions.SaveFileMode;
+            var vm = CreateVM<FileAttachmentVM>();
+
+            if (Request.Form.Files != null && Request.Form.Files.Count() > 0)
+            {
+                //通过文件流方式上传附件
+                var FileData = Request.Form.Files[0];
+                vm.Entity.FileName = FileData.FileName;
+                vm.Entity.Length = FileData.Length;
+                vm = FileHelper.GetFileByteForUpload(vm, FileData.OpenReadStream(), ConfigInfo, FileData.FileName, sm);
+            }
+            else if (Request.Form.Keys != null && Request.Form.ContainsKey("FileID"))
+            {
+                //通过Base64方式上传附件
+                var FileData = Convert.FromBase64String(Request.Form["FileID"]);
+                vm.Entity.FileName = "SCRAWL_" + DateTime.Now.ToString("yyyyMMddHHmmssttt") + ".jpg";
+                vm.Entity.Length = FileData.Length;
+                MemoryStream MS = new MemoryStream(FileData);
+                vm = FileHelper.GetFileByteForUpload(vm, MS, ConfigInfo, vm.Entity.FileName, sm);
+            }
+            vm.Entity.UploadTime = DateTime.Now;
+            vm.Entity.SaveFileMode = sm;
+            vm.Entity.IsTemprory = false;
+            if ((!string.IsNullOrEmpty(vm.Entity.Path) && (vm.Entity.SaveFileMode == SaveFileModeEnum.Local || vm.Entity.SaveFileMode == SaveFileModeEnum.DFS)) || (vm.Entity.FileData != null && vm.Entity.SaveFileMode == SaveFileModeEnum.Database))
+            {
+                vm.DoAdd();
+                string url = $"/_Framework/GetFile?id={vm.Entity.ID}&stream=true&_DONOT_USE_CS={CurrentCS}";
+                return Content($"{{\"Code\": 200 , \"Msg\": \"success\", \"Data\": {{\"src\": \"{url}\",\"FileName\":\"{vm.Entity.FileName}\"}}}}");
+            }
+            return Content($"{{\"Code\": 1 , \"Msg\": \"上传失败\", \"Data\": {{\"src\": \"\"}}}}");
+        }
+
+        [AllRights]
+        [Public]
+        [ActionDescription("加载UEditor配置文件")]
+        public IActionResult LoadUEditorConfig()
+        {
+            string FilePath = Path.GetFullPath("wwwroot/ueditor/config.json");
+            var json = System.IO.File.ReadAllText(FilePath);
+            var data = JsonConvert.DeserializeObject<UEditorConfigJson>(json);
+            return Json(data);
+        }
+
+        private class UEditorConfigJson
+        {
+            public string imageActionName { get; set; }
+            public string imageFieldName { get; set; }
+            public string imageMaxSize { get; set; }
+            public List<string> imageAllowFiles { get; set; }
+            public string imageCompressEnable { get; set; }
+            public string imageCompressBorder { get; set; }
+            public string imageInsertAlign { get; set; }
+            public string imageUrlPrefix { get; set; }
+            public string imagePathFormat { get; set; }
+            public string scrawlActionName { get; set; }
+            public string scrawlFieldName { get; set; }
+            public string scrawlPathFormat { get; set; }
+            public string scrawlMaxSize { get; set; }
+            public string scrawlUrlPrefix { get; set; }
+            public string scrawlInsertAlign { get; set; }
+            public string snapscreenActionName { get; set; }
+            public string snapscreenPathFormat { get; set; }
+            public string snapscreenUrlPrefix { get; set; }
+            public string snapscreenInsertAlign { get; set; }
+            public List<string> catcherLocalDomain { get; set; }
+            public string catcherActionName { get; set; }
+            public string catcherFieldName { get; set; }
+            public string catcherPathFormat { get; set; }
+            public string catcherUrlPrefix { get; set; }
+            public string catcherMaxSize { get; set; }
+            public List<string> catcherAllowFiles { get; set; }
+            public string videoActionName { get; set; }
+            public string videoFieldName { get; set; }
+            public string videoPathFormat { get; set; }
+            public string videoUrlPrefix { get; set; }
+            public string videoMaxSize { get; set; }
+            public List<string> videoAllowFiles { get; set; }
+            public string fileActionName { get; set; }
+            public string fileFieldName { get; set; }
+            public string filePathFormat { get; set; }
+            public string fileUrlPrefix { get; set; }
+            public string fileMaxSize { get; set; }
+            public List<string> fileAllowFiles { get; set; }
+            public string imageManagerActionName { get; set; }
+            public string imageManagerListPath { get; set; }
+            public string imageManagerListSize { get; set; }
+            public string imageManagerUrlPrefix { get; set; }
+            public string imageManagerInsertAlign { get; set; }
+            public List<string> imageManagerAllowFiles { get; set; }
+            public string fileManagerActionName { get; set; }
+            public string fileManagerListPath { get; set; }
+            public string fileManagerUrlPrefix { get; set; }
+            public string fileManagerListSize { get; set; }
+            public List<string> fileManagerAllowFiles { get; set; }
+        }
     }
 }

@@ -8072,20 +8072,15 @@
             setTimeout(function () {
                 try {
                     me.options.imageUrl && me.setOpt('serverUrl', me.options.imageUrl.replace(/^(.*[\/]).+([\.].+)$/, '$1controller$2'));
-
-                    var configUrl = me.getActionUrl('LoadConfig');
-                    //isJsonp = utils.isCrossDomainUrl(configUrl);
-
-                    /* 发出ajax请求 */
+                    var configUrl = me.getActionUrl('LoadUEditorConfig');
                     me._serverConfigLoaded = false;
 
                     configUrl && UE.ajax.request(configUrl, {
                         'method': 'GET',
-                        'dataType': 'Json', //isJsonp ? 'jsonp' : 'Json',
+                        'dataType': 'Json',
                         'onsuccess': function (r) {
                             try {
                                 var result = JSON.parse(r.response);
-                                //var config = isJsonp ? r : result.Data;
                                 utils.extend(me.options, result.Data);
                                 me.fireEvent('serverConfigLoaded');
                                 me._serverConfigLoaded = true;
@@ -8104,10 +8099,6 @@
 
             function showErrorMsg(msg) {
                 console && console.error(msg);
-                //me.fireEvent('showMessage', {
-                //    'title': msg,
-                //    'type': 'error'
-                //});
             }
         };
 
@@ -24521,8 +24512,8 @@
                                 body = (iframe.contentDocument || iframe.contentWindow.document).body,
                                 result = body.innerText || body.textContent || '';
                             json = (new Function("return " + result))();
-                            link = me.options.imageUrlPrefix + json.Data.ID;
-                            if (json.Msg == 'success' && json.Data.ID) {
+                            link = me.options.imageUrlPrefix + json.Data.src;
+                            if (json.Code=='200' && json.Data.src) {
                                 loader = me.document.getElementById(loadingId);
                                 loader.setAttribute('src', link);
                                 loader.setAttribute('_src', link);
@@ -25517,7 +25508,7 @@
                 popEl.className += ' ' + ANCHOR_CLASSES[(sideUp ? 1 : 0) * 2 + (sideLeft ? 1 : 0)];
                 if (this.editor) {
                     popEl.style.zIndex = this.editor.container.style.zIndex * 1 + 10;
-                    baidu.editor.ui.uiUtils.getFixedLayer().style.zIndex = popEl.style.zIndex - 1;
+                    baidu.editor.ui.uiUtils.getFixedLayer().style.zIndex = 99999999; //popEl.style.zIndex - 1;
                 }
                 this.getDom().style.visibility = 'visible';
 
@@ -27072,9 +27063,7 @@
                 el.style.top = Math.max(top, 0) + 'px';
             },
             showAtCenter: function () {
-
                 var vpRect = uiUtils.getViewportRect();
-
                 if (!this.fullscreen) {
                     this.getDom().style.display = '';
                     var popSize = this.fitSize();
@@ -27277,7 +27266,7 @@
                     this.editor.container.style.zIndex && (this.getDom().style.zIndex = this.editor.container.style.zIndex * 1 + 10);
                     this._hidden = false;
                     this.fireEvent('show');
-                    baidu.editor.ui.uiUtils.getFixedLayer().style.zIndex = this.getDom().style.zIndex - 4;
+                    baidu.editor.ui.uiUtils.getFixedLayer().style.zIndex = 99999999; //this.getDom().style.zIndex - 4;
                 }
             },
             isHidden: function () {
@@ -29129,7 +29118,7 @@
             _updateFullScreen: function () {
                 if (this._fullscreen) {
                     var vpRect = uiUtils.getViewportRect();
-                    this.getDom().style.cssText = 'border:0;position:absolute;left:0;top:' + (this.editor.options.topOffset || 0) + 'px;width:' + vpRect.width + 'px;height:' + vpRect.height + 'px;z-index:' + (this.getDom().style.zIndex * 1 + 100);
+                    this.getDom().style.cssText = 'border:0;position:absolute;left:0;top:' + (this.editor.options.topOffset || 0) + 'px;width:' + vpRect.width + 'px;height:' + vpRect.height + 'px;z-index:' + (this.getDom().style.zIndex * 1 + 99999999);
                     uiUtils.setViewportOffset(this.getDom(), { left: 0, top: this.editor.options.topOffset || 0 });
                     this.editor.setHeight(vpRect.height - this.getDom('toolbarbox').offsetHeight - this.getDom('bottombar').offsetHeight - (this.editor.options.topOffset || 0), true);
                     //不手动调一下，会导致全屏失效

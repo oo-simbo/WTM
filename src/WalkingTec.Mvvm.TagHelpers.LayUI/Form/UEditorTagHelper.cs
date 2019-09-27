@@ -25,7 +25,7 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI.Form
             {
                 output.Content.SetContent(Field?.Model?.ToString());
             }
-            output.Attributes.Add("style", "width:1000px;height:600px;");
+            output.Attributes.Add("style", "width:100%;height:600px;");
             var Content = $@"<script>UE.getEditor('{Id}');</script>";
             output.PostElement.AppendHtml(Content);
             base.Process(context, output);

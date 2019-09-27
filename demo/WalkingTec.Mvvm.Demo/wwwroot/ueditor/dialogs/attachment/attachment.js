@@ -502,7 +502,7 @@
                 try {
                     var responseText = (ret._raw || ret),
                         json = utils.str2json(responseText);
-                    if (json.Msg == 'success') {
+                    if (json.Code == '200') {
                         _this.fileList.push(json.Data);
                         $file.append('<span class="success"></span>');
                     } else {
@@ -555,7 +555,7 @@
                 var data = this.fileList[i];
                 list.push({
                     title: data.FileName,
-                    url: prefix + data.ID
+                    url: prefix + data.src
                 });
             }
             return list;
