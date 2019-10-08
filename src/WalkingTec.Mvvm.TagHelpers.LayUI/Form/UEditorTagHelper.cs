@@ -11,6 +11,11 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI.Form
         //文本框为空显示的PlaceHolder
         public string EmptyText { get; set; }
 
+        //定义高度
+        public new int? Height { get; set; }
+
+        //定义宽度
+        public new int? Width { get; set; }
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
@@ -25,8 +30,11 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI.Form
             {
                 output.Content.SetContent(Field?.Model?.ToString());
             }
-            output.Attributes.Add("style", "width:100%;height:600px;");
-            var Content = $@"<script>UE.getEditor('{Id}');</script>";
+
+            string StrWidth = Width == null ? "100%" : (Width + "px");
+            string StrHeight = Height == null ? "200px" : (Height + "px");
+            output.Attributes.Add("style", $"width:{StrWidth};height:{StrHeight};");
+            var Content = $@"<script>UE.loadEditor('{Id}');</script>";
             output.PostElement.AppendHtml(Content);
             base.Process(context, output);
         }

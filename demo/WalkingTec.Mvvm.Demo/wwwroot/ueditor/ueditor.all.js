@@ -24513,7 +24513,7 @@
                                 result = body.innerText || body.textContent || '';
                             json = (new Function("return " + result))();
                             link = me.options.imageUrlPrefix + json.Data.src;
-                            if (json.Code=='200' && json.Data.src) {
+                            if (json.Code == '200' && json.Data.src) {
                                 loader = me.document.getElementById(loadingId);
                                 loader.setAttribute('src', link);
                                 loader.setAttribute('_src', link);
@@ -29443,6 +29443,26 @@
         UE.getEditor = function (id, opt) {
             var editor = instances[id];
             if (!editor) {
+                editor = instances[id] = new UE.ui.Editor(opt);
+                editor.render(id);
+            }
+            return editor;
+        };
+
+        /**
+         * 重复加载的时候，可以使用此方法 与 getEditor一致
+         * @param {any} id
+         * @param {any} opt
+         */
+        UE.loadEditor = function (id, opt) {
+            console.log(id);
+            var editor = instances[id];
+            if (!editor) {
+                editor = instances[id] = new UE.ui.Editor(opt);
+                editor.render(id);
+            }
+            else {
+                editor.destroy();
                 editor = instances[id] = new UE.ui.Editor(opt);
                 editor.render(id);
             }
