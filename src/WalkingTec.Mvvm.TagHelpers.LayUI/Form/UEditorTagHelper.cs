@@ -26,15 +26,7 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI.Form
             string StrHeight = Height == null ? "200px" : (Height + "px");
             output.Attributes.Add("style", $"width:{StrWidth};height:{StrHeight};");
             output.Attributes.Add("isrich", "1");
-            string Content = string.Empty;
-            if (DefaultValue != null)
-            {
-                Content = @"<script>UE.loadEditor('" + Id + "').ready(function(){this.setContent('" + DefaultValue.ToString() + "')});</script>";
-            }
-            else
-            {
-                Content = @"<script>UE.loadEditor('" + Id + "').ready(function(){this.setContent('" + Field?.Model?.ToString() + "')});</script>";
-            }
+            string Content = @"<script>UE.loadEditor('" + Id + "').ready(function(){this.setContent('" + DefaultValue != null ? DefaultValue.ToString() : Field?.Model?.ToString() + "')});</script>";
             output.PostElement.AppendHtml(Content);
             base.Process(context, output);
         }
