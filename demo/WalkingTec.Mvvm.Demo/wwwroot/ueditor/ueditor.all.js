@@ -23,6 +23,8 @@
 
     var dom = UE.dom = {};
 
+    var FrameIndex = 888;
+
     // core/browser.js
     /**
      * 浏览器判断模块
@@ -8048,7 +8050,7 @@
             autoClearEmptyNode: true,
             fullscreen: false,
             readonly: false,
-            zIndex: 999,
+            zIndex: FrameIndex,
             imagePopup: true,
             enterTag: 'p',
             customDomain: false,
@@ -29455,7 +29457,6 @@
          * @param {any} opt
          */
         UE.loadEditor = function (id, opt) {
-            console.log(id);
             var editor = instances[id];
             if (!editor) {
                 editor = instances[id] = new UE.ui.Editor(opt);

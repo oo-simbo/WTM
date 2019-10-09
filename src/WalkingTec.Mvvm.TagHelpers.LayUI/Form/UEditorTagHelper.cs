@@ -22,19 +22,19 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI.Form
             string placeHolder = EmptyText ?? "";
             output.TagName = "div";
             output.TagMode = TagMode.StartTagAndEndTag;
-            if (DefaultValue != null)
-            {
-                output.Content.SetContent(DefaultValue.ToString());
-            }
-            else
-            {
-                output.Content.SetContent(Field?.Model?.ToString());
-            }
-
             string StrWidth = Width == null ? "100%" : (Width + "px");
             string StrHeight = Height == null ? "200px" : (Height + "px");
             output.Attributes.Add("style", $"width:{StrWidth};height:{StrHeight};");
-            var Content = $@"<script>UE.loadEditor('{Id}');</script>";
+            output.Attributes.Add("isrich", "1");
+            string Content = string.Empty;
+            if (DefaultValue != null)
+            {
+                Content = @"<script>UE.loadEditor('" + Id + "').ready(function(){this.setContent('" + DefaultValue.ToString() + "')});</script>";
+            }
+            else
+            {
+                Content = @"<script>UE.loadEditor('" + Id + "').ready(function(){this.setContent('" + Field?.Model?.ToString() + "')});</script>";
+            }
             output.PostElement.AppendHtml(Content);
             base.Process(context, output);
         }
