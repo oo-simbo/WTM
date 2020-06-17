@@ -53,7 +53,7 @@ namespace WalkingTec.Mvvm.Mvc
                 var linktype = Type.GetType(entity.LinkedType);
                 if (linktype != typeof(FileAttachment))
                 {
-                    var subpros = Type.GetType(entity.LinkedType).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Where(x=>x.GetMemberType() == typeof(string)).OrderBy(x => x.Name).ToList().ToListItems(x => x.Name, x => x.Name);
+                    var subpros = Type.GetType(entity.LinkedType).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance).Where(x=>x.GetMemberType() == typeof(string) && x.Name != "BatchError").OrderBy(x => x.Name).ToList().ToListItems(x => x.Name, x => x.Name);
                     var subproswithname = subpros.Where(x => x.Text.ToLower().Contains("name")).ToList();
                     var subproswithoutname = subpros.Where(x => x.Text.ToLower().Contains("name") == false).ToList();
                     subpros = new List<ComboSelectListItem>();
@@ -123,8 +123,9 @@ namespace WalkingTec.Mvvm.Mvc
                         if(fk != null)
                         {
                             ignoreField.Add(fk);
+                            show = true;
                         }
-                        if(checktype == typeof(FileAttachment))
+                        if (checktype == typeof(FileAttachment))
                         {
                             view.IsImportField = false;
                             view.FieldDes += $"({Program._localizer["Attachment"]})";
@@ -134,7 +135,6 @@ namespace WalkingTec.Mvvm.Mvc
                             view.FieldDes += $"({Program._localizer["OneToMany"]})";
                         }
                         view.LinkedType = checktype.AssemblyQualifiedName;
-                        show = true;
                     }
                     if (checktype.IsList())
                     {

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
@@ -21,18 +21,9 @@ namespace $ns$.Test
         }
 
         [TestMethod]
-        public void IndexTest()
-        {
-            ViewResult rv = (ViewResult)_controller.Index();
-            //测试是否正确IndexVM
-            Assert.IsInstanceOfType(rv.Model, typeof(IndexVM));
-        }
-
-        [TestMethod]
         public void PIndexTest()
         {
             ViewResult rv = (ViewResult)_controller.PIndex();
-            //测试是否正确返回
             Assert.IsNotNull(rv);
         }
 
@@ -40,7 +31,6 @@ namespace $ns$.Test
         public void FrontPageTest()
         {
             PartialViewResult rv = (PartialViewResult)_controller.FrontPage();
-            //测试是否正确返回
             Assert.IsNotNull(rv);
         }
     }

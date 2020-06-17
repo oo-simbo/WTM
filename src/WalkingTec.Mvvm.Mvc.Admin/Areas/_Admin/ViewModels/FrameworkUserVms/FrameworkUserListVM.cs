@@ -34,8 +34,8 @@ namespace WalkingTec.Mvvm.Mvc.Admin.ViewModels.FrameworkUserVms
                 this.MakeGridHeader(x => x.CellPhone,120),
                 this.MakeGridHeader(x => x.RoleName_view),
                 this.MakeGridHeader(x => x.GroupName_view),
-                this.MakeGridHeader(x=> x.PhotoId,130).SetFormat(PhotoIdFormat),
-                this.MakeGridHeader(x => x.IsValid).SetHeader(Program._localizer?["Enable"]).SetWidth(70),
+                this.MakeGridHeader(x=> x.PhotoId,170).SetFormat(PhotoIdFormat),
+                this.MakeGridHeader(x => x.IsValid).SetHeader(Program._localizer?["Enable"]).SetWidth(80),
                 this.MakeGridHeaderAction(width: 280)
             };
         }
@@ -63,8 +63,8 @@ namespace WalkingTec.Mvvm.Mvc.Admin.ViewModels.FrameworkUserVms
                     PhotoId = x.PhotoId,
                     CellPhone = x.CellPhone,
                     IsValid = x.IsValid,
-                    RoleName_view = DC.Set<FrameworkRole>().Where(y => x.UserRoles.Select(z => z.RoleId).Contains(y.ID)).Select(y => y.RoleName).ToSpratedString(null,","),
-                    GroupName_view = DC.Set<FrameworkGroup>().Where(y => x.UserGroups.Select(z => z.GroupId).Contains(y.ID)).Select(y => y.GroupName).ToSpratedString(null, ","),
+                    RoleName_view = x.UserRoles.Select(y => y.Role.RoleName).ToSpratedString(null, ","),
+                    GroupName_view = x.UserGroups.Select(y => y.Group.GroupName).ToSpratedString(null, ","),
                     Sex = x.Sex
                 })
                 .OrderBy(x => x.ITCode);

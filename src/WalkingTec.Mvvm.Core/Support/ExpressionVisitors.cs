@@ -98,7 +98,7 @@ namespace WalkingTec.Mvvm.Core
         {
             //先调用一次Visit，删除所有的where表达式
             var rv = Visit(expression);
-            if(rv.NodeType == ExpressionType.Constant)
+            if (rv.NodeType == ExpressionType.Constant)
             {
                 if ((rv.Type.IsGeneric(typeof(EntityQueryable<>)) || rv.Type.IsGeneric(typeof(EnumerableQuery<>))))
                 {
@@ -132,7 +132,8 @@ namespace WalkingTec.Mvvm.Core
             var parentNode = exp.Arguments[0] as MethodCallExpression;
             if (parentNode == null || (parentNode.Method.Name.ToLower() != "orderby" && parentNode.Method.Name.ToLower() != "orderbydescending"))
             {
-                if(parentNode == null){
+                if (parentNode == null)
+                {
                     return exp.Arguments[0];
                 }
                 return parentNode;
@@ -169,9 +170,14 @@ namespace WalkingTec.Mvvm.Core
                 Expression rv = null;
                 foreach (var item in info)
                 {
-                    ParameterExpression pe = Expression.Parameter(modelType,"x");
                     var idproperty = modelType.GetProperties().Where(x => x.Name == item.Property).FirstOrDefault();
-                    Expression pro = Expression.Property(pe, idproperty);
+                    if (idproperty == null)
+                    {
+                        return node;
+                    }
+                    var reftype = idproperty.DeclaringType;
+                    ParameterExpression pe = Expression.Parameter(modelType, "x");
+                    Expression pro = Expression.Property(pe, reftype.GetProperties().Where(x => x.Name == item.Property).FirstOrDefault());
                     Type proType = idproperty.PropertyType;
                     if (item.Direction == SortDir.Asc)
                     {
@@ -217,6 +223,7 @@ namespace WalkingTec.Mvvm.Core
                     }
                 }
                 return rv;
+
             }
             return base.VisitMethodCall(node);
         }
@@ -226,7 +233,7 @@ namespace WalkingTec.Mvvm.Core
     /// <summary>
     /// 替换表达式中的Where语句
     /// </summary>
-    public class WhereReplaceModifier<T> : ExpressionVisitor where T:TopBasePoco
+    public class WhereReplaceModifier<T> : ExpressionVisitor where T : TopBasePoco
     {
         private Type _modelType;
         private bool _addMode = false;
@@ -261,7 +268,7 @@ namespace WalkingTec.Mvvm.Core
                     return GetDCModel(exp);
                 }
             }
-            else if(expression.NodeType == ExpressionType.Constant)
+            else if (expression.NodeType == ExpressionType.Constant)
             {
                 if (expression.Type.IsGeneric(typeof(EnumerableQuery<>)))
                 {
@@ -324,7 +331,7 @@ namespace WalkingTec.Mvvm.Core
                 return GetParentExpNotWhere(parentNode);
             }
         }
-      
+
         protected override Expression VisitConstant(ConstantExpression node)
         {
             if (_addMode == true)
@@ -358,7 +365,7 @@ namespace WalkingTec.Mvvm.Core
             //如果不是添加模式，那么删除所有的where条件
             if (_addMode == false)
             {
-                if(node.Arguments.Count == 0)
+                if (node.Arguments.Count == 0)
                 {
                     return base.VisitMethodCall(node);
                 }
@@ -404,7 +411,7 @@ namespace WalkingTec.Mvvm.Core
         /// </summary>
         public IsValidModifier()
         {
-            _where = x=>x.IsValid==true;
+            _where = x => x.IsValid == true;
         }
 
         /// <summary>
@@ -429,7 +436,7 @@ namespace WalkingTec.Mvvm.Core
             }
             else if (expression.NodeType == ExpressionType.Constant)
             {
-                if (expression.Type.IsGeneric(typeof(EnumerableQuery<>)))
+                if (expression.Type.IsGeneric(typeof(EntityQueryable<>)) || expression.Type.IsGeneric(typeof(EnumerableQuery<>)))
                 {
                     return expression.Type.GenericTypeArguments[0];
                 }

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Localization;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using WalkingTec.Mvvm.Core;
+using WalkingTec.Mvvm.Core.Support.Json;
 
 namespace WalkingTec.Mvvm.Mvc
 {
@@ -18,9 +18,11 @@ namespace WalkingTec.Mvvm.Mvc
         IDataContext DC { get; set; }
         LoginUserInfo LoginUserInfo { get; set; }
 
+        IDistributedCache Cache { get; }
+
         string BaseUrl { get; set; }
 
-        ActionLog Log { get; set; }
+        SimpleLog Log { get; set; }
 
         IDataContext CreateDC(bool isLog = false);
 

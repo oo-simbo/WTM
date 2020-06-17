@@ -1,35 +1,37 @@
+using System;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
+using NPOI.HSSF.Util;
 using WalkingTec.Mvvm.Core;
-using WalkingTec.Mvvm.Mvc;
-using WalkingTec.Mvvm.Demo.ViewModels.SchoolVMs;
-using WalkingTec.Mvvm.Mvc.Binders;
-using WalkingTec.Mvvm.Demo.Models;
+using WalkingTec.Mvvm.Core.Auth.Attribute;
 using WalkingTec.Mvvm.Core.Extensions;
+using WalkingTec.Mvvm.Demo.Models;
+using WalkingTec.Mvvm.Demo.ViewModels.SchoolVMs;
+using WalkingTec.Mvvm.Mvc;
+using WalkingTec.Mvvm.Mvc.Binders;
 
 namespace WalkingTec.Mvvm.Demo.Controllers
 {
-    
+    [AuthorizeJwtWithCookie]
     [ActionDescription("学校管理（单表）")]
     public class SchoolController : BaseController
     {
         #region 搜索
-        [ActionDescription("搜索")]
+        [ActionDescription("Search")]
         public ActionResult Index()
         {
             var vm = CreateVM<SchoolListVM>();
             return PartialView(vm);
         }
 
-        [ActionDescription("搜索")]
+        [ActionDescription("Search")]
         [HttpPost]
         public ActionResult Index(SchoolListVM vm)
         {
             return PartialView(vm);
         }
 
-        [ActionDescription("搜索")]
+        [ActionDescription("Search")]
         [HttpPost]
         public string Search(SchoolListVM vm)
         {
@@ -49,14 +51,15 @@ namespace WalkingTec.Mvvm.Demo.Controllers
         [ActionDescription("搜索并修改某字段")]
         public ActionResult EditIndex(SchoolListVM2 vm)
         {
-            //由于只更新名称字段，其他必填字段并没有值也不影响            
-            ModelState.Clear();
-            foreach (var item in vm.EntityList)
+            if (!ModelState.IsValid)
             {
-                //手动更新某个字段，由于没有使用BaseCRUDVM，如果有验证条件需要自己判断
-                DC.UpdateProperty<School>(new School { ID = item.ID, SchoolName = item.SchoolName }, x => x.SchoolName);
+                vm.ProcessListError(vm.EntityList);
+                return PartialView(vm);
             }
-            DC.SaveChanges();
+            else
+            {
+                vm.UpdateEntityList();
+            }
             return PartialView(vm);
         }
 
@@ -176,11 +179,11 @@ namespace WalkingTec.Mvvm.Demo.Controllers
         {
             if (!ModelState.IsValid || !vm.DoBatchEdit())
             {
-                return PartialView("BatchEdit",vm);
+                return PartialView("BatchEdit", vm);
             }
             else
             {
-                return FFResult().RefreshGrid().CloseDialog().Alert("操作成功，共有"+vm.Ids.Length+"条数据被修改");
+                return FFResult().RefreshGrid().CloseDialog().Alert("操作成功，共有" + vm.Ids.Length + "条数据被修改");
             }
         }
         #endregion
@@ -200,17 +203,17 @@ namespace WalkingTec.Mvvm.Demo.Controllers
         {
             if (!ModelState.IsValid || !vm.DoBatchDelete())
             {
-                return PartialView("BatchDelete",vm);
+                return PartialView("BatchDelete", vm);
             }
             else
             {
-                return FFResult().RefreshGrid().CloseDialog().Alert("操作成功，共有"+vm.Ids.Length+"条数据被删除");
+                return FFResult().RefreshGrid().CloseDialog().Alert("操作成功，共有" + vm.Ids.Length + "条数据被删除");
             }
         }
         #endregion
 
         #region 导入
-		[ActionDescription("导入")]
+        [ActionDescription("导入")]
         public ActionResult Import()
         {
             var vm = CreateVM<SchoolImportVM>();
@@ -227,7 +230,7 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             }
             else
             {
-                return FFResult().RefreshGrid().CloseDialog().Alert("成功导入 " + vm.EntityList.Count.ToString() + " 行数据");
+                return FFResult().RefreshGrid().CloseDialog().Alert( Core.Program._localizer["ImportSuccess", vm.EntityList.Count.ToString()]);
             }
         }
         #endregion
@@ -253,7 +256,7 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             }
             else
             {
-                if(vm.Entity.Majors == null)
+                if (vm.Entity.Majors == null)
                 {
                     vm.Entity.Majors = new System.Collections.Generic.List<Major>();
                 }
@@ -294,6 +297,10 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             }
             else
             {
+                if (vm.Entity.Majors == null)
+                {
+                    vm.Entity.Majors = new System.Collections.Generic.List<Major>();
+                }
                 vm.DoEdit();
                 if (!ModelState.IsValid)
                 {
@@ -309,5 +316,20 @@ namespace WalkingTec.Mvvm.Demo.Controllers
         }
         #endregion
 
+        [ActionDescription("Export")]
+        [HttpPost]
+        public ActionResult ExportExcel(SchoolListVM vm)
+        {
+            vm.ExportMaxCount = 5; //自定义每个Excel最多数据行数，默认是100万
+            vm.ExportTitleBackColor = HSSFColor.Black.Index;
+            vm.ExportTitleFontColor = HSSFColor.White.Index;
+            return vm.GetExportData();
+        }
+
+        [HttpPost]
+        public IActionResult Download(long id, long[] ids)
+        {
+            return File(new byte[0], "application/vnd.ms-excel", $"Export_ActionLog_{DateTime.Now.ToString("yyyy-MM-dd")}.xls");
+        }
     }
 }

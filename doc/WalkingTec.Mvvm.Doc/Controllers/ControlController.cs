@@ -1,20 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc;
 
 namespace WalkingTec.Mvvm.Doc.Controllers
 {
-    [Public]
-    [ActionDescription("控制器层")]
+    [AllowAnonymous]
+    [ActionDescription("Controller")]
     public class ControlController : BaseController
     {
-        [ActionDescription("介绍")]
+        [ActionDescription("Intro")]
         public IActionResult Intro()
         {
             return PartialView();
         }
 
-        [ActionDescription("属性")]
+        [ActionDescription("Att")]
         public IActionResult Att()
         {
             return PartialView();

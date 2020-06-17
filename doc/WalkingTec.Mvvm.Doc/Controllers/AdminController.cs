@@ -1,48 +1,53 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc;
 
 namespace WalkingTec.Mvvm.Doc.Controllers
 {
-    [Public]
-    [ActionDescription("页面层")]
+    [AllowAnonymous]
+    [ActionDescription("Admin")]
     public class AdminController : BaseController
     {
-        [ActionDescription("介绍")]
+        [ActionDescription("Intro")]
         public IActionResult Intro()
         {
             return PartialView();
         }
 
-        [ActionDescription("日志管理")]
+        [ActionDescription("Log")]
         public new IActionResult Log()
         {
             return PartialView();
         }
 
-        [ActionDescription("用户管理")]
+        [ActionDescription("UserManagement")]
         public new IActionResult User()
         {
             return PartialView();
         }
-        [ActionDescription("角色管理")]
+
+        [ActionDescription("RoleManagement")]
         public IActionResult Role()
         {
             return PartialView();
         }
-        [ActionDescription("用户组管理")]
+
+        [ActionDescription("GroupManagement")]
         public IActionResult Group()
         {
             return PartialView();
         }
-        [ActionDescription("菜单管理")]
+
+        [ActionDescription("MenuManagement")]
         public IActionResult Menu()
         {
             return PartialView();
         }
-        [ActionDescription("数据权限管理")]
+
+        [ActionDescription("Dataprivilege")]
         public IActionResult Dp()
-        {  
+        {
             return PartialView();
         }
     }

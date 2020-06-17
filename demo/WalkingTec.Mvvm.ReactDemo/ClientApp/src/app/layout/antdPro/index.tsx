@@ -1,19 +1,27 @@
 import { BasicLayout, GridContent } from '@ant-design/pro-layout';
+import { Icon } from 'antd';
 import LayoutSpin from "components/other/LayoutSpin";
 import GlobalConfig from 'global.config';
 import lodash from 'lodash';
-import { action, toJS } from 'mobx';
+import { action, observable, toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import { renderRoutes } from 'react-router-config';
 import { Link } from 'react-router-dom';
 import Store from 'store/index';
 import RightContent from './GlobalHeader/RightContent';
-import TabsPages from './TabsPages';
+import UserMenu from './GlobalHeader/userMenu';
 import SettingDrawer, { ContentWidth } from './SettingDrawer';
+import themeColor from 'utils/themeColor';
 import './style.less';
+import TabsPages from './TabsPages';
+// import { ConfigConsumer } from 'antd/lib/config-provider';
+// import {  } from 'antd';
+// ConfigConsumer
 @observer
 export default class App extends React.Component<any> {
+    @observable
+    collapse = false;
     /**
      *settings 变更 事件
      *
@@ -22,7 +30,16 @@ export default class App extends React.Component<any> {
      */
     @action.bound
     onSettingChange(settings) {
+        if (!lodash.eq(settings.primaryColor, GlobalConfig.settings.primaryColor)) {
+            themeColor.changeColor(settings.primaryColor)
+        }
         GlobalConfig.settings = settings;
+    }
+    @action.bound
+    changeLang(event) {
+        GlobalConfig.language = event.key;
+        window['g_locale'] = GlobalConfig.language;
+        window.location.reload()
     }
     // 菜单 打开 的 key
     defaultOpenKeys = [];
@@ -54,8 +71,16 @@ export default class App extends React.Component<any> {
             this.defaultOpenKeys = this.getDefaultOpenKeys(Store.Meun.ParallelMenu, this.getMenu(nextProps.location.pathname));
         }
     }
+    componentDidMount() {
+    }
+    @action.bound
+    togglerContent() {
+        this.collapse = !this.collapse;
+    };
+
     public render() {
         const settings = toJS(GlobalConfig.settings);
+        const { language } = GlobalConfig;
         // window['g_locale']='en-US'
         return (
             <>
@@ -63,10 +88,12 @@ export default class App extends React.Component<any> {
                     logo={GlobalConfig.default.logo}
                     {...settings}
                     rightContentRender={rightProps => (
-                        <RightContent {...rightProps} changeLang={event => {
-                            // window['g_locale'] = event.key
-                        }} />
-
+                        <RightContent {...rightProps} selectedLang={language} changeLang={this.changeLang} >
+                            <UserMenu {...rightProps} {...this.props} />
+                            <div className={`ant-pro-setting ${settings.navTheme} ${settings.layout}`} onClick={this.togglerContent}>
+                                <Icon type={'setting'} />
+                            </div>
+                        </RightContent>
                     )}
                     menuHeaderRender={(logo, title) => <Link to="/">{logo}{title}</Link>}
                     menuDataRender={() => toJS(Store.Meun.subMenu)}
@@ -88,12 +115,11 @@ export default class App extends React.Component<any> {
                 >
                     {settings.tabsPage && settings.contentWidth !== "Fixed" ? <TabsPages {...this.props} /> : <MainContent {...this.props} contentWidth={settings.contentWidth} />}
                 </BasicLayout>
-                <SettingDrawer settings={settings} onSettingChange={this.onSettingChange} />
+                <SettingDrawer collapse={this.collapse} onCollapseChange={this.togglerContent} settings={settings} onSettingChange={this.onSettingChange} />
             </>
         );
     }
 }
-
 class MainContent extends React.Component<{ contentWidth: ContentWidth, route?: any }> {
     shouldComponentUpdate(nextProps: any, nextState: any, nextContext: any) {
         return !lodash.eq(this.props.contentWidth, nextProps.contentWidth)

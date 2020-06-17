@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Razor.TagHelpers;
+using WalkingTec.Mvvm.Core;
 
 namespace WalkingTec.Mvvm.TagHelpers.LayUI
 {
@@ -47,6 +48,16 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI
 
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
+            BaseVM vm = null;
+            string formid = "";
+            if (context.Items.ContainsKey("model") == true)
+            {
+                vm = context.Items["model"] as BaseVM;
+            }
+            if (context.Items.ContainsKey("formid"))
+            {
+                formid = context.Items["formid"].ToString();
+            }
             if (IsLink == false)
             {
                 output.Attributes.SetAttribute("type", "button");
@@ -57,30 +68,49 @@ namespace WalkingTec.Mvvm.TagHelpers.LayUI
                 output.TagMode = TagMode.StartTagAndEndTag;
                 output.Attributes.SetAttribute("href", "#");
             }
+
             if (Target == null || Target == ButtonTargetEnum.Layer)
             {
                 string windowid = Guid.NewGuid().ToString();
                 if (PostCurrentForm == true && context.Items.ContainsKey("formid"))
                 {
-                    Click = $"ff.OpenDialog('{Url}', '{windowid}', '{WindowTitle ?? ""}',{WindowWidth?.ToString() ?? "null"}, {WindowHeight?.ToString() ?? "null"}, ff.GetPostData('{context.Items["formid"]}'),{Max.ToString().ToLower()})";
+                    Click = $@"
+    try{{
+        {formid}validate = false;
+        $('#{formid}hidesubmit').trigger('click');
+    }}
+    catch{{ {formid}validate = true;}}
+    if({formid}validate == true){{
+    ff.OpenDialog('{Url}', '{windowid}', '{WindowTitle ?? ""}',{WindowWidth?.ToString() ?? "null"}, {WindowHeight?.ToString() ?? "null"}, ff.GetPostData('{context.Items["formid"]}'),{Max.ToString().ToLower()})
+    }}
+";
                 }
                 else
                 {
                     Click = $"ff.OpenDialog('{Url}', '{windowid}', '{WindowTitle ?? ""}',{WindowWidth?.ToString() ?? "null"}, {WindowHeight?.ToString() ?? "null"},undefined,{Max.ToString().ToLower()})";
                 }
             }
-            else if(Target == ButtonTargetEnum.self)
+            else if (Target == ButtonTargetEnum.self)
             {
                 if (PostCurrentForm == true && context.Items.ContainsKey("formid"))
                 {
-                    Click = $"ff.BgRequest('{Url}',ff.GetPostData('{context.Items["formid"]}'))";
+                    Click = $@"
+    try{{
+        {formid}validate = false;
+        $('#{formid}hidesubmit').trigger('click');
+    }}
+    catch{{ {formid}validate = true;}}
+    if({formid}validate == true){{
+    ff.BgRequest('{Url}',ff.GetPostData('{context.Items["formid"]}'),'{vm?.ViewDivId}')
+    }}
+";
                 }
                 else
                 {
                     Click = $"ff.BgRequest('{Url}')";
                 }
             }
-            else if(Target == ButtonTargetEnum.newwindow)
+            else if (Target == ButtonTargetEnum.newwindow)
             {
                 if (Url.StartsWith("~"))
                 {

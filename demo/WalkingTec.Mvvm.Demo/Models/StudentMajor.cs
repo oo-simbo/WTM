@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
+
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Core.Attributes;
 
@@ -15,6 +13,6 @@ namespace WalkingTec.Mvvm.Demo.Models
 
         public Guid MajorId { get; set; }
 
-        public Guid StudentId { get; set; }
+        public string StudentId { get; set; }
     }
 }

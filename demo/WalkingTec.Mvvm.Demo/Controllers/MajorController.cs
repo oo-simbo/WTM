@@ -1,6 +1,8 @@
+using System;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
+
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc;
 using WalkingTec.Mvvm.Demo.ViewModels.MajorVMs;
@@ -8,7 +10,6 @@ using WalkingTec.Mvvm.Core.Extensions;
 
 namespace WalkingTec.Mvvm.Demo.Controllers
 {
-    
     [ActionDescription("专业管理（一对多）")]
     public class MajorController : BaseController
     {
@@ -24,7 +25,14 @@ namespace WalkingTec.Mvvm.Demo.Controllers
         [HttpPost]
         public string Search(MajorListVM vm)
         {
-            return vm.GetJson(false);
+            if (ModelState.IsValid == true)
+            {
+                return vm.GetJson(false);
+            }
+            else
+            {
+                return vm.GetError();
+            }
         }
         #endregion
 
@@ -196,5 +204,15 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             }
         }
         #endregion
+
+        [ActionDescription("Export")]
+        [HttpPost]
+        public IActionResult ExportExcel(MajorListVM vm)
+        {
+            vm.SearcherMode = vm.Ids != null && vm.Ids.Count > 0 ? ListVMSearchModeEnum.CheckExport : ListVMSearchModeEnum.Export;
+            var data = vm.GenerateExcel();
+            return File(data, "application/vnd.ms-excel", $"Export_ActionLog_{DateTime.Now.ToString("yyyy-MM-dd")}.xls");
+        }
+
     }
 }

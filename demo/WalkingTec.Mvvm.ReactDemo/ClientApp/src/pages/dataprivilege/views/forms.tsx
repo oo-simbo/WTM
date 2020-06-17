@@ -19,12 +19,12 @@ export class InsertForm extends React.Component<any, any> {
             ...this.props,
             models: this.models,
         }
-        const Isgroup = Models.getValue(props, "DpType",0) == "0"
-        const Isall = Models.getValue(props, "IsAll",true) == "true"
+        const Isgroup = Models.getValue(props, "DpType", 0) == "0"
+        const Isall = Models.getValue(props, "IsAll", true) == "true"
         return <InfoShellLayout>
             <FormItem {...props} fieId="DpType" layout="row" value='0' />
-            <FormItem {...props} fieId="UserItCode" hidden={Isgroup} />
-            <FormItem {...props} fieId="Entity.GroupId" hidden={!Isgroup} />
+            {(!Isgroup)&& <FormItem {...props} fieId="UserItCode"  />}
+            {(Isgroup)&& <FormItem {...props} fieId="Entity.GroupId" />}
             <Col span={24}></Col>
             <FormItem {...props} fieId="Entity.TableName" />
             <FormItem {...props} fieId="IsAll" value='true' />
@@ -56,13 +56,15 @@ export class UpdateForm extends React.Component<WTM.FormProps, any> {
             ...this.props,
             models: this.models,
         }
+        lodash.update(props, 'defaultValues.IsAll', value => String(value));
+        lodash.update(props, 'defaultValues.DpType', value => String(value));
         getFieldDecorator('Entity.ID', { initialValue: lodash.get(this.props.defaultValues, 'Entity.ID') })
-        const Isgroup = Models.getValue(props,"DpType") == "0"
+        const Isgroup = Models.getValue(props, "DpType") == "0"
         const Isall = Models.getValue(props, "IsAll") == "true"
         return <InfoShellLayout>
             <FormItem {...props} fieId="DpType" layout="row" />
-            <FormItem {...props} fieId="UserItCode" hidden={Isgroup} />
-            <FormItem {...props} fieId="Entity.GroupId" hidden={!Isgroup} />
+            {(!Isgroup)&& <FormItem {...props} fieId="UserItCode"  />}
+            {(Isgroup)&& <FormItem {...props} fieId="Entity.GroupId" />}
             <Col span={24}></Col>
             <FormItem {...props} fieId="Entity.TableName" />
             <FormItem {...props} fieId="IsAll" />

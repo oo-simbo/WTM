@@ -5,7 +5,7 @@
  * @modify date 2019-02-24 17:05:58
  * @desc [description]
  */
-import { Button, Col, Divider, Form, Icon, Row, Spin } from 'antd';
+import { Button, Col, Divider, Form, Icon, Row, Spin, notification } from 'antd';
 import { WrappedFormUtils } from 'antd/lib/form/Form';
 import { DesError } from 'components/decorators';
 import GlobalConfig from 'global.config';
@@ -17,6 +17,7 @@ import Store from 'store/dataSource';
 import { Debounce, BindAll } from 'lodash-decorators';
 
 import "./style.less";
+import { FormattedMessage } from 'react-intl';
 interface IAppProps {
     /** 状态 */
     Store: Store;
@@ -39,25 +40,63 @@ interface IAppProps {
 @observer
 @BindAll()
 export class DataViewSearch extends React.Component<IAppProps, any> {
+    ref = React.createRef<HTMLDivElement>();
     Store: Store = this.props.Store;
     @observable toggle = false;
     columnCount = GlobalConfig.searchColumnCount || 3;
     @observable key = Date.now();
+    componentDidMount() {
+        this.onSubmit()
+    }
+    onSetErrorMsg(Form) {
+        // console.log("DataViewSearch -> onSetErrorMsg -> Form", Form)
+        const { setFields, getFieldValue } = this.props.form;
+        let msg = '';
+        // setFields(
+        lodash.mapValues(Form, (error, key) => {
+            msg += ` ` + error;
+            // return {
+            //     value: getFieldValue(key),
+            //     errors: [new Error(error)]
+            // }
+        })
+        // )
+
+        msg && notification.error({
+            key: 'DataViewSearch',
+            message: msg, //ajax.status,
+            duration: 5,
+            // description: `${ajax.request.method}: ${ajax.request.url}`,
+        });
+    }
+    async onSearch(values) {
+        console.log("搜索参数", values);
+        try {
+            await this.Store.onSearch(values)
+        } catch (error) {
+            console.log("DataViewSearch -> onSearch -> error", error)
+            if (lodash.hasIn(error, 'Form')) {
+                this.onSetErrorMsg(error.Form)
+            }
+        }
+    }
     /**
      * 提交表单
      * @param e 
      */
     // @Debounce(500)
-    onSubmit(e) {
+    onSubmit(e?) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
         if (this.props.onSubmit) {
             return this.props.onSubmit(e)
         }
-        e.preventDefault();
-        e.stopPropagation();
+
         this.props.form.validateFields((err, values) => {
-            console.log("搜索参数", values);
             if (!err) {
-                this.Store.onSearch(values)
+                this.onSearch(values)
             }
         });
     }
@@ -76,7 +115,8 @@ export class DataViewSearch extends React.Component<IAppProps, any> {
         resetFields();
         this.props.form.validateFields((err, values) => {
             if (!err) {
-                this.Store.onSearch(lodash.mapValues(values, x => undefined))
+                // this.Store.onSearch(lodash.mapValues(values, x => undefined))
+                this.onSearch(lodash.mapValues(values, x => undefined))
                 runInAction(() => { this.key = Date.now() })
             }
         });
@@ -86,10 +126,21 @@ export class DataViewSearch extends React.Component<IAppProps, any> {
     onToggle() {
         this.toggle = !this.toggle;
         document.body.style.overflowY = "hidden";
+        const parentNode: HTMLDivElement = this.ref.current && this.ref.current.parentNode as HTMLDivElement;
+        if (parentNode && parentNode.offsetHeight) {
+            parentNode.style.overflow = "hidden";
+            parentNode.style.maxHeight = `${parentNode.clientHeight}px`;
+        }
         lodash.defer(() => {
             // 主动触发 浏览器 resize 事件
             dispatchEvent(new CustomEvent('resize'));
-            lodash.delay(() => document.body.style.overflowY = "", 1000)
+            lodash.delay(() => {
+                document.body.style.overflowY = "";
+                if (parentNode && parentNode.offsetHeight) {
+                    parentNode.style.overflow = '';
+                    parentNode.style.maxHeight = ``;
+                }
+            }, 600)
         })
     }
     render() {
@@ -117,30 +168,27 @@ export class DataViewSearch extends React.Component<IAppProps, any> {
         }
         const { PageState } = this.Store;
         return (
-            <>
-                {/* <DataSpin Store={this.Store} /> */}
+            <div ref={this.ref}>
                 {items.length > 0 && <Form className="data-view-search" onSubmit={this.onSubmit}>
-                    {/* <Spin spinning={PageState.tableLoading}> */}
                     <Row type="flex" align="top">
                         {items.map(x => <Col key={`${this.key}_${x.key}`} lg={colSpan} md={12} sm={24} xs={24} >{x}</Col>)}
                         <Col lg={colSpanSearch} md={24} sm={24} xs={24} className="data-view-search-right" >
-                            <Button loading={PageState.tableLoading} icon="search" type="primary" htmlType="submit" >搜索</Button>
+                            <Button loading={PageState.tableLoading} icon="search" type="primary" htmlType="submit" ><FormattedMessage id="action.search" /></Button>
                             <Divider type="vertical" />
-                            <Button loading={PageState.tableLoading} icon="retweet" onClick={this.onReset} >重置</Button>
+                            <Button loading={PageState.tableLoading} icon="retweet" onClick={this.onReset} ><FormattedMessage id="action.reset" /></Button>
                             {
                                 toggleShow && <>
                                     <Divider type="vertical" />
                                     <a className="data-view-search-toggle" onClick={this.onToggle}>
-                                        {this.toggle ? <>收起 <Icon type='up' /></> : <>展开 <Icon type='down' /></>}
+                                        {this.toggle ? <><FormattedMessage id="action.retract" /><Icon type='up' /></> : <><FormattedMessage id="action.open" /> <Icon type='down' /></>}
                                     </a>
                                 </>
                             }
                         </Col>
                     </Row>
-                    {/* </Spin> */}
                     <div className="data-view-search-divider"></div>
                 </Form>}
-            </>
+            </div>
         );
     }
 }

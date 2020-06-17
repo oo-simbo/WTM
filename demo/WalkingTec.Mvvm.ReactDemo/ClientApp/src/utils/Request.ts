@@ -12,6 +12,7 @@ import NProgress from 'nprogress';
 import { interval, Observable, of, TimeoutError } from "rxjs";
 import { ajax, AjaxError, AjaxResponse, AjaxRequest } from "rxjs/ajax";
 import { catchError, filter, map, timeout } from "rxjs/operators";
+import { getLocalesValue } from "locale";
 interface Preview {
     data: any
     message: string
@@ -36,7 +37,7 @@ export class Request {
         if (typeof target === "string") {
             this.target = target;
         }
-        this.getHeaders();
+        // this.getHeaders();
     }
     /** 
      * 请求路径前缀
@@ -46,10 +47,7 @@ export class Request {
      * 获取 认证 token请求头
      */
     getHeaders() {
-        return {
-            ...GlobalConfig.headers,
-            token: GlobalConfig.token.get()
-        }
+        return GlobalConfig.getHeaders()
     }
 
     /**
@@ -79,15 +77,16 @@ export class Request {
                     // 数据 Response 
                     if (ajax instanceof AjaxResponse) {
                         // 无 响应 数据
-                        if (lodash.isNil(ajax.response)) {
-                            console.warn("响应体为 NULL", ajax)
-                            // GlobalConfig.development && notification.warn({
-                            //     message: "响应体为 NULL ",
-                            //     duration: 5,
-                            //     description: `url:${lodash.get(ajax, "request.url")}`
-                            // })
-                            return false
-                        }
+                        //if (lodash.isNil(ajax.response)) {
+                        //    console.warn(`未解析到 response ${ajax.request.url}`, ajax)
+                        //    GlobalConfig.development && notification.warn({
+                        //        message: "未解析到 response ",
+                        //        duration: 5,
+                        //        description: `url:${lodash.get(ajax, "request.url")}`
+                        //    })
+                        //    sub.error({})
+                        //    return false
+                        //}
                         return true
                     }
                     // 错误
@@ -114,9 +113,9 @@ export class Request {
                         sub.error({})
                         notification.error({
                             key: ajax.request.url,
-                            message: ajax.status,
+                            message: getLocalesValue(`tips.status.${ajax.status}`, `${ajax.request.method}: ${ajax.request.url}`), //ajax.status,
                             duration: 5,
-                            description: `${ajax.request.method}: ${ajax.request.url}`,
+                            // description: `${ajax.request.method}: ${ajax.request.url}`,
                         });
                         return false
                     }
@@ -138,12 +137,12 @@ export class Request {
                     }
                     switch (res.status) {
                         case 200:
-                            return res.response
+                            return res.response || true
                         default:
                             notification.warn({
-                                message: res.status,
+                                message: getLocalesValue(`tips.status.${res.status}`, `请配置 状态 ${res.status} 处理逻辑`),
                                 duration: 5,
-                                description: `请配置 状态 ${res.status} 处理逻辑`,
+                                // description: `请配置 状态 ${res.status} 处理逻辑`,
                             });
                             break;
                     }
@@ -210,7 +209,7 @@ export class Request {
      */
     ajax(urlOrRequest: string | AjaxRequest) {
         if (lodash.isString(urlOrRequest)) {
-            return this.AjaxObservable(ajax(this.get({ url: urlOrRequest })))
+            return this.AjaxObservable(ajax(this.get({ url: urlOrRequest, headers: this.getHeaders() })))
         }
         urlOrRequest.headers = { ...this.getHeaders(), ...urlOrRequest.headers };
         switch (lodash.toLower(urlOrRequest.method)) {

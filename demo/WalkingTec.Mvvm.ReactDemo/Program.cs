@@ -9,6 +9,7 @@ using WalkingTec.Mvvm.ReactDemo.Models;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc;
 using WalkingTec.Mvvm.TagHelpers.LayUI;
+using Microsoft.Extensions.Logging;
 
 namespace WalkingTec.Mvvm.ReactDemo
 {
@@ -21,17 +22,35 @@ namespace WalkingTec.Mvvm.ReactDemo
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .ConfigureServices(x =>
+                         .ConfigureLogging((hostingContext, logging) =>
+                         {
+                             logging.ClearProviders();
+                             logging.AddConsole();
+                             logging.AddDebug();
+                             logging.AddWTMLogger();
+                         })
+               .ConfigureServices(x =>
                 {
                     var pris = new List<IDataPrivilege>
                         {
-                            new DataPrivilegeInfo<School>("学校", y => y.SchoolName),
+                            new DataPrivilegeInfo<FrameworkRole>("测试角色", y => y.RoleName),
                         };
                     x.AddFrameworkService(dataPrivilegeSettings: pris);
                     x.AddLayui();
                     x.AddSwaggerGen(c =>
                     {
                         c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                        c.AddSecurityDefinition("Bearer", new ApiKeyScheme()
+                        {
+                            Description = "JWT Bearer",
+                            Name = "Authorization",
+                            In = "header",
+                            Type = "apiKey"
+                        });
+                        c.AddSecurityRequirement(new Dictionary<string, IEnumerable<string>>
+                            {
+                                { "Bearer", new string[] { } }
+                            });
                     });
                     x.AddSpaStaticFiles(configuration =>
                     {

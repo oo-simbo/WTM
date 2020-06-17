@@ -1,19 +1,27 @@
-using Microsoft.AspNetCore.Mvc;
+
+using System;
 using System.Web;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
-using WalkingTec.Mvvm.Mvc;
+using WalkingTec.Mvvm.Core.Extensions;
 using WalkingTec.Mvvm.Demo.ViewModels.HomeVMs;
+using WalkingTec.Mvvm.Mvc;
+using Microsoft.Extensions.Logging;
+using WalkingTec.Mvvm.Demo.Models;
 
 namespace WalkingTec.Mvvm.Demo.Controllers
 {
-    [Public]
     public class LoginController : BaseController
     {
-        [ActionDescription("登录")]
+        [Public]
+        [ActionDescription("Login")]
         public IActionResult Login()
         {
             LoginVM vm = CreateVM<LoginVM>();
-            vm.Redirect = HttpContext.Request.Query["rd"];
+            vm.Redirect = HttpContext.Request.Query["Redirect"];
             if (ConfigInfo.IsQuickDebug == true)
             {
                 vm.ITCode = "admin";
@@ -22,15 +30,16 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             return View(vm);
         }
 
+        [Public]
         [HttpPost]
-        public ActionResult Login(LoginVM vm)
+        public async Task<ActionResult> Login(LoginVM vm)
         {
             if (ConfigInfo.IsQuickDebug == false)
             {
                 var verifyCode = HttpContext.Session.Get<string>("verify_code");
                 if (string.IsNullOrEmpty(verifyCode) || verifyCode.ToLower() != vm.VerifyCode.ToLower())
                 {
-                    vm.MSD.AddModelError("", "验证码不正确");
+                    vm.MSD.AddModelError("", Localizer["Login.ValidationFail"]);
                     return View(vm);
                 }
             }
@@ -43,7 +52,7 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             else
             {
                 LoginUserInfo = user;
-                string url = "";
+                string url = string.Empty;
                 if (!string.IsNullOrEmpty(vm.Redirect))
                 {
                     url = vm.Redirect;
@@ -52,20 +61,65 @@ namespace WalkingTec.Mvvm.Demo.Controllers
                 {
                     url = "/";
                 }
+
+                AuthenticationProperties properties = null;
+                if (vm.RememberLogin)
+                {
+                    properties = new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.Add(TimeSpan.FromDays(30))
+                    };
+                }
+
+                var principal = user.CreatePrincipal();
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);
+
                 return Redirect(HttpUtility.UrlDecode(url));
             }
         }
 
-        [ActionDescription("登出")]
-        public ActionResult Logout()
+        [Public]
+        public IActionResult Reg()
         {
-            LoginUserInfo = null;
+            var vm = CreateVM<RegVM>();
+            return PartialView(vm);
+        }
+
+        [Public]
+        [HttpPost]
+        public IActionResult Reg(RegVM vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                return PartialView(vm);
+            }
+            else
+            {
+                var rv = vm.DoReg();
+                if (rv == true)
+                {
+                    return FFResult().CloseDialog().Message(Localizer["Reg.Success"]);
+                }
+                else
+                {
+                    return PartialView(vm);
+                }
+            }
+        }
+
+
+        [AllRights]
+        [ActionDescription("Logout")]
+        public async Task Logout()
+        {
             HttpContext.Session.Clear();
-            return Redirect("/Login/Login?rd=");
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            HttpContext.Response.Redirect("/");
         }
 
         [AllRights]
-        [ActionDescription("修改密码")]
+        [ActionDescription("ChangePassword")]
         public ActionResult ChangePassword()
         {
             var vm = CreateVM<ChangePasswordVM>();
@@ -73,8 +127,9 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             return PartialView(vm);
         }
 
+        [AllRights]
         [HttpPost]
-        [ActionDescription("修改密码")]
+        [ActionDescription("ChangePassword")]
         public ActionResult ChangePassword(ChangePasswordVM vm)
         {
             if (!ModelState.IsValid)
@@ -84,7 +139,7 @@ namespace WalkingTec.Mvvm.Demo.Controllers
             else
             {
                 vm.DoChange();
-                return FFResult().CloseDialog().Alert("密码修改成功，下次请使用新密码登录。");
+                return FFResult().CloseDialog().Alert(Localizer["ChangePasswordSuccess"]);
             }
         }
 

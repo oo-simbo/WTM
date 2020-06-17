@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WalkingTec.Mvvm.Core;
 using WalkingTec.Mvvm.Mvc;
 
 namespace WalkingTec.Mvvm.Doc.Controllers
 {
-    [Public]
-    [ActionDescription("前后端分离（React）")]
+    [AllowAnonymous]
+    [ActionDescription("Clientside")]
     public class SpaController : BaseController
     {
         [ActionDescription("介绍")]
@@ -14,13 +15,13 @@ namespace WalkingTec.Mvvm.Doc.Controllers
             return PartialView();
         }
 
-        [ActionDescription("全局配置")]
+        [ActionDescription("Global")]
         public IActionResult Global()
         {
             return PartialView();
         }
 
-        [ActionDescription("文件结构")]
+        [ActionDescription("Dir")]
         public IActionResult Dir()
         {
             return PartialView();

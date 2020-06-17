@@ -10,6 +10,8 @@ import Store from 'store/index';
 import Request from 'utils/Request';
 import RequestFiles from 'utils/RequestFiles';
 import styles from './index.module.less';
+import { FormattedMessage } from 'react-intl';
+import { getLocalesTemplate, getLocalesValue } from 'locale';
 @observer
 export default class UserMenu extends React.Component<any, any> {
   render() {
@@ -20,26 +22,24 @@ export default class UserMenu extends React.Component<any, any> {
     }
     return (
       <Dropdown overlayClassName={classNames(styles.userDropdown)} overlay={
-        // globalConfig.development ? 
         <Menu>
-          <Menu.Item>
-            <a href="/_codegen?ui=react" target="_blank">  <Icon type='code' /> 代码生成器</a>
-          </Menu.Item>
-          <Menu.Item>
-            <a href="/swagger" target="_blank">  <Icon type='bars' /> API文档</a>
-          </Menu.Item>
+          {globalConfig.development && <Menu.Item>
+            <a href="/_codegen?ui=react" target="_blank">  <Icon type='code' /> <FormattedMessage id='action.user.codeGenerator' /></a>
+          </Menu.Item>}
+          {globalConfig.development && <Menu.Item>
+            <a href="/swagger" target="_blank">  <Icon type='bars' /> <FormattedMessage id='action.user.apiDocument' /></a>
+          </Menu.Item>}
           <Menu.Item>
             <DialogForm
-              title="修改密码"
+              title={<FormattedMessage id='action.user.changePassword' />}
               icon="user"
               type="a"
-              width="700"
             >
               <InsertForm />
             </DialogForm>
           </Menu.Item>
           <Menu.Item>
-            <a onClick={e => { Store.User.outLogin() }}>  <Icon type='user-delete' /> 退出</a>
+            <a onClick={e => { Store.User.outLogin() }}>  <Icon type='logout' /> <FormattedMessage id='action.user.logout' /></a>
           </Menu.Item>
         </Menu>
       } placement="bottomCenter">
@@ -65,28 +65,28 @@ export default class UserMenu extends React.Component<any, any> {
 export class InsertForm extends React.Component<any, any> {
   models = {
     "OldPassword": {
-      label: "旧密码",
-      rules: [{ "required": true, "message": "旧密码不能为空" }],
-      formItem: <Input.Password placeholder="请输入 旧密码" />
+      label: <FormattedMessage id='update.pwd.old' />,
+      rules: [{ "required": true, "message": <FormattedMessage id='tips.error.required' values={{ txt: getLocalesValue('update.pwd.old') }} /> }],
+      formItem: <Input.Password placeholder={getLocalesTemplate('tips.placeholder.input', { txt: getLocalesValue('update.pwd.old') })} />
     },
     "NewPassword": {
-      label: "新密码",
-      rules: [{ "required": true, "message": "新密码不能为空" }],
-      formItem: <Input.Password placeholder="请输入 新密码" />
+      label: <FormattedMessage id='update.pwd.new' />,
+      rules: [{ "required": true, "message": <FormattedMessage id='tips.error.required' values={{ txt: getLocalesValue('update.pwd.new') }} /> }],
+      formItem: <Input.Password placeholder={getLocalesTemplate('tips.placeholder.input', { txt: getLocalesValue('update.pwd.new') })} />
     },
     "NewPasswordComfirm": {
-      label: "确认秘密",
-      rules: [{ "required": true, "message": "确认新密码不能为空" }, {
+      label: <FormattedMessage id='update.pwd.confirm' />,
+      rules: [{ "required": true, "message": <FormattedMessage id='tips.error.required' values={{ txt: getLocalesValue('update.pwd.confirm') }} /> }, {
         validator: (rule, value, callback) => {
           const form = this.props.form;
           if (value && value !== form.getFieldValue('NewPassword')) {
-            callback('新密码不一致!');
+            callback(getLocalesValue('update.pwd.inconsistent'));
           } else {
             callback();
           }
         }
       }],
-      formItem: <Input.Password placeholder="确认秘密" />
+      formItem: <Input.Password placeholder={getLocalesValue('update.pwd.confirm')} />
     },
   };
   render() {

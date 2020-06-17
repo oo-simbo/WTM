@@ -1,4 +1,15 @@
 <html>
+<head>
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?cce7a18264274038f0ee50ef3f9f46ce";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+</head>
 <style>
     body{
         margin:0px;
@@ -92,13 +103,13 @@
                 <td>
                     <select name="DotnetVersion">
                         <option value="dotnet2_2">.netcore2.2</option>
-                        <option value="dotnet3_0">.netcore3.0</option>
+                        <option value="dotnet3_0">.netcore3.1</option>
                    </select>
                 </td>
             </tr>
             <tr>
                 <td>链接字符串：</td>
-                <td><input name="CS" value="Server=(localdb)\\mssqllocaldb;Database=$dbname$;Trusted_Connection=True;MultipleActiveResultSets=true"/></td>
+                <td><input name="CS" value="Server=(localdb)\\mssqllocaldb;Database=$dbname$;Trusted_Connection=True;"/></td>
             </tr>
             <tr>
                 <td>数据库类型：</td>
@@ -148,6 +159,7 @@
                     <select name="UI">
                         <option value="LayUI">LayUI</option>
                         <option value="React">React(前后端分离)</option>
+                        <option value="Vue">Vue(前后端分离)</option>
                     </select>
                 </td>
             </tr>
@@ -178,7 +190,7 @@
         </table>
 		<input type="hidden" name="ExtraDir" value="$extradir$" />
 		<input type="hidden" name="ExtraNs" value="$extrans$" />
-        <button class="submitColor" type="submit" onclick="return confirm('该操作将重置框架相关的代码及配置，请提前做好备份，是否继续？');">开始配置</button>
+        <button class="submitColor" type="submit" onclick="return confirm('一个包含VS解决方案的zip文件将会生成，是否继续？');">开始配置</button>
     </form>
 </div>
 

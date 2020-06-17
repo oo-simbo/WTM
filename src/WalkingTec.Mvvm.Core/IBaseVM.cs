@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using WalkingTec.Mvvm.Core;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace WalkingTec.Mvvm.Core
 {
@@ -14,10 +14,6 @@ namespace WalkingTec.Mvvm.Core
         /// UniqueId
         /// </summary>
         string UniqueId { get; }
-        /// <summary>
-        /// UploadFileId
-        /// </summary>
-        Guid? UploadFileId { get; set; }
         /// <summary>
         /// WindowIds
         /// </summary>
@@ -53,9 +49,13 @@ namespace WalkingTec.Mvvm.Core
         ///// <summary>
         ///// Config
         ///// </summary>
-        //Configs Config { get; set; } 
-
+        //Configs Config { get; set; }
+        IModelStateService MSD { get; set; }
         ISessionService Session { get; set; }
+
+        IDistributedCache Cache { get; set; }
+
+        LoginUserInfo LoginUserInfo { get; set; }
         #endregion
 
         #region Event
